@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PillBox</string>
+    <string name="welcome_msg">Welcome!</string>
+</resources>
