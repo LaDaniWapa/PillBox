@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -42,7 +43,9 @@ data class LoginScreen(val modifier: Modifier) : Screen {
         val navigator = LocalNavigator.currentOrThrow
 
         Column(
-            modifier = modifier.padding(16.dp),
+            modifier = modifier
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceAround
         ) {
             Spacer(modifier = Modifier.height(32.dp))
@@ -58,9 +61,7 @@ data class LoginScreen(val modifier: Modifier) : Screen {
             )
 
             Column(
-                modifier = modifier
-                    .padding(24.dp)
-                    .verticalScroll(rememberScrollState()),
+                modifier = modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -69,10 +70,10 @@ data class LoginScreen(val modifier: Modifier) : Screen {
                 // Email TextField
                 LabelTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    label = "Email",
+                    label = stringResource(R.string.email),
                     value = email,
                     onValueChange = { email = it },
-                    placeholder = "example@gmail.com",
+                    placeholder = stringResource(R.string.email_example),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 )
 
@@ -81,10 +82,10 @@ data class LoginScreen(val modifier: Modifier) : Screen {
                 // Password TextField
                 LabelTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    label = "Contraseña",
+                    label = stringResource(R.string.password),
                     value = password,
                     onValueChange = { password = it },
-                    placeholder = "*****",
+                    placeholder = stringResource(R.string.password_example),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     visualTransformation = PasswordVisualTransformation()
                 )
@@ -96,7 +97,7 @@ data class LoginScreen(val modifier: Modifier) : Screen {
                     onClick = { navigator.replaceAll(HomeScreen(modifier)) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Log in", fontSize = 16.sp)
+                    Text(stringResource(R.string.login), fontSize = 16.sp)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -104,7 +105,7 @@ data class LoginScreen(val modifier: Modifier) : Screen {
                 // Create Account Text
                 TextButton(
                     onClick = { navigator.replaceAll(RegisterScreen(modifier)) }) {
-                    Text("Aun no tienes cuenta? Crea una", fontSize = 14.sp)
+                    Text(stringResource(R.string.no_account_signup), fontSize = 14.sp)
                 }
             }
         }

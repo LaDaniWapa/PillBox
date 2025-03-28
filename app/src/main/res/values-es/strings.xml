@@ -2,4 +2,14 @@
 <resources>
     <string name="app_name">PillBox</string>
     <string name="welcome_msg">Bienvenid@!</string>
+    <string name="email_example">ejemplo@gmail.com</string>
+    <string name="email">Correo</string>
+    <string name="password">Contraseña</string>
+    <string name="login">Iniciar sesión</string>
+    <string name="no_account_signup">¿Aún no tienes cuenta? Crea una</string>
+    <string name="name">Nombre</string>
+    <string name="name_example">Daniela</string>
+    <string name="repeat_password">Repetir contraseña</string>
+    <string name="signup">Registrarse</string>
+    <string name="already_have_account_login">\"Ya tienes una cuenta? Inicia sesión\"</string>
 </resources>
