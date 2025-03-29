@@ -63,7 +63,7 @@ data class LoginScreen(val modifier: Modifier) : Screen {
 
         LaunchedEffect(vm.loginSuccess) {
             vm.loginSuccess.collect { success ->
-                if (success) navigator.replaceAll(HomeScreen())
+                if (success) navigator.replaceAll(HomeScreen(modifier))
             }
         }
 

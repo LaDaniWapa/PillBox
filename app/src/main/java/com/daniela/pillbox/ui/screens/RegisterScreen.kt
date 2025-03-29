@@ -57,6 +57,8 @@ data class RegisterScreen(val modifier: Modifier = Modifier) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val vm: RegisterViewModel = rememberVoyagerScreenModel<RegisterViewModel>()
 
+        // TODO: Proper navigation with newly created user
+
         Column(
             modifier = modifier
                 .padding(horizontal = 16.dp)
