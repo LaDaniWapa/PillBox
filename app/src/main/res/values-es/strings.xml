@@ -19,4 +19,13 @@
     <string name="error_password_length">La contraseña debe tener al menos 8 caracteres</string>
     <string name="error_confirm_password_required">Por favor confirma tu contraseña</string>
     <string name="error_passwords_mismatch">Las contraseñas no coinciden</string>
+    <string name="error_invalid_credentials">Correo o contraseña incorrectos</string>
+    <string name="error_invalid_data">Datos no validos</string>
+    <string name="error_login_failed">Error al iniciar sesión: %s</string>
+    <string name="error_400">Datos de solicitud inválidos</string>
+    <string name="error_401">Credenciales inválidas</string>
+    <string name="error_409">El correo ya está registrado</string>
+    <string name="error_500">Error del servidor</string>
+    <string name="error_network">Fallo de conexión</string>
+    <string name="error_unknown">Error inesperado: %s</string>
 </resources>

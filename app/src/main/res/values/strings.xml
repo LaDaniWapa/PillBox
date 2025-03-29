@@ -19,4 +19,14 @@
     <string name="error_password_length">Password must be at least 8 characters</string>
     <string name="error_confirm_password_required">Please confirm your password</string>
     <string name="error_passwords_mismatch">Passwords don\'t match</string>
+    <string name="error_invalid_credentials">Invalid email or password</string>
+    <string name="error_invalid_data">Invalid input data</string>
+    <string name="error_login_failed">Login failed: %s</string>
+
+    <string name="error_400">Invalid request data</string>
+    <string name="error_401">Invalid credentials</string>
+    <string name="error_409">Email already exists</string>
+    <string name="error_500">Server error</string>
+    <string name="error_network">Network connection failed</string>
+    <string name="error_unknown">An unexpected error occurred: %s</string>
 </resources>

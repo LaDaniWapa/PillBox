@@ -1,16 +1,32 @@
 package com.daniela.pillbox.viewmodels
 
+import android.content.Context
 import android.util.Patterns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
+import com.daniela.pillbox.data.repository.AuthRepository
+import com.daniela.pillbox.utils.AuthErrorHandler
+import io.appwrite.exceptions.AppwriteException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.io.IOException
 
-class RegisterViewModel : ScreenModel {
+class RegisterViewModel(
+    private val authRepository: AuthRepository,
+    private val authErrorHandler: AuthErrorHandler,
+    private val ctx: Context,
+) : ScreenModel {
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    val registerSuccess = MutableStateFlow(false)
+
+    // Input values
     var name by mutableStateOf("")
         private set
     var email by mutableStateOf("")
@@ -30,9 +46,13 @@ class RegisterViewModel : ScreenModel {
     var confirmPasswordError by mutableStateOf<Int?>(null)
         private set
 
-    private val _registrationSuccess = MutableStateFlow(false)
-    val registrationSuccess: StateFlow<Boolean> = _registrationSuccess.asStateFlow()
+    // Api handling
+    var isLoading by mutableStateOf(false)
+        private set
+    var apiError by mutableStateOf<String?>(null)
+        private set
 
+    // Setters
     fun updateName(newName: String) {
         name = newName
         nameError = null
@@ -53,7 +73,29 @@ class RegisterViewModel : ScreenModel {
         confirmPasswordError = null
     }
 
-    fun registerUser(): Boolean {
+    fun register() {
+        if (!validateInputs()) return
+
+        isLoading = true
+        apiError = null
+
+        coroutineScope.launch {
+            try {
+                val success = authRepository.register(email, password, name)
+                if (success)
+                    registerSuccess.value = true
+                else
+                    apiError = ctx.getString(R.string.error_409)
+
+            } catch (e: Exception) {
+                apiError = authErrorHandler.handleRegistrationError(e)
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    private fun validateInputs(): Boolean {
         // Reset all errors
         nameError = null
         emailError = null
@@ -91,10 +133,12 @@ class RegisterViewModel : ScreenModel {
             isValid = false
         }
 
-        if (isValid) {
-            _registrationSuccess.value = true
-        }
-
         return isValid
+    }
+
+    // Garbage Collector
+    override fun onDispose() {
+        super.onDispose()
+        coroutineScope.cancel()
     }
 }

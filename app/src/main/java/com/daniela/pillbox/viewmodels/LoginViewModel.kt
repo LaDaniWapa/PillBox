@@ -1,30 +1,48 @@
 package com.daniela.pillbox.viewmodels
 
+import android.content.Context
 import android.util.Patterns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
+import com.daniela.pillbox.data.repository.AuthRepository
+import com.daniela.pillbox.utils.AuthErrorHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class LoginViewModel : ScreenModel {
+class LoginViewModel(
+    private val authRepository: AuthRepository,
+    private val authErrorHandler: AuthErrorHandler,
+    private val ctx: Context,
+) : ScreenModel {
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    val loginSuccess = MutableStateFlow(false)
+
+    // Input values
     var email by mutableStateOf("")
         private set
     var password by mutableStateOf("")
         private set
 
-    // Using the same string resources as registration
+    // Individual error states
     var emailError by mutableStateOf<Int?>(null)
         private set
     var passwordError by mutableStateOf<Int?>(null)
         private set
 
-    private val _loginSuccess = MutableStateFlow(false)
-    val loginSuccess: StateFlow<Boolean> = _loginSuccess.asStateFlow()
+    // Api handling
+    var isLoading by mutableStateOf(false)
+        private set
+    var apiError by mutableStateOf<String?>(null)
+        private set
 
+    // Setters
     fun updateEmail(newEmail: String) {
         email = newEmail
         emailError = null
@@ -35,7 +53,30 @@ class LoginViewModel : ScreenModel {
         passwordError = null
     }
 
-    fun login(): Boolean {
+    fun login() {
+        if (!validateInputs()) return
+
+        isLoading = true
+        apiError = null
+
+        coroutineScope.launch {
+            try {
+                val success = authRepository.login(email, password)
+                if (success)
+                    loginSuccess.value = true
+                else
+                    apiError = ctx.getString(R.string.error_invalid_credentials)
+            } catch (e: Exception) {
+                apiError = authErrorHandler.handleRegistrationError(e)
+
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+
+    private fun validateInputs(): Boolean {
         // Reset errors
         emailError = null
         passwordError = null
@@ -58,10 +99,12 @@ class LoginViewModel : ScreenModel {
             isValid = false
         }
 
-        if (isValid) {
-            _loginSuccess.value = true
-        }
-
         return isValid
+    }
+
+    // Garbage Collector
+    override fun onDispose() {
+        super.onDispose()
+        coroutineScope.cancel()
     }
 }

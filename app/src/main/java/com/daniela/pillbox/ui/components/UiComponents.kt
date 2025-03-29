@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -51,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -70,7 +72,8 @@ fun LabelTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
     visualTransformation: VisualTransformation = VisualTransformation.None,
     isError: Boolean = false,
-    supportingText: String? = null
+    supportingText: String? = null,
+    keyboardActions: KeyboardActions = KeyboardActions(),
 ) {
     Column {
         //External label
@@ -98,7 +101,7 @@ fun LabelTextField(
                 if (supportingText != null)
                     Text(text = supportingText)
             },
-
+            keyboardActions = keyboardActions,
             shape = RoundedCornerShape(10.dp),
             singleLine = true,
             colors = TextFieldDefaults.colors(
@@ -139,12 +142,15 @@ fun Label(modifier: Modifier = Modifier, text: String = "Text") {
 fun MyButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
+    enabled: Boolean = true,
     content: @Composable (RowScope.() -> Unit) = { Text("Button") },
 ) {
     Button(
         onClick = onClick,
         content = content,
         modifier = modifier,
+        enabled = enabled,
+
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,

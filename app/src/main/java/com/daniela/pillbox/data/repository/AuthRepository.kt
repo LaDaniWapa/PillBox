@@ -19,17 +19,21 @@ class AuthRepository(val ctx: Context) {
     private val _user = MutableStateFlow<User<Map<String, Any>>?>(null)
     val user: StateFlow<User<Map<String, Any>>?> get() = _user.asStateFlow()
 
-    suspend fun register(email: String, password: String, name: String) {
+    suspend fun register(email: String, password: String, name: String): Boolean {
         val account = Account(client)
 
-        try {
+        return try {
             // Create the user
             val user = account.create(ID.unique(), email, password, name)
             _user.value = user
             Log.d("AccountService", "User created: $user")
+
+            true
         } catch (e: AppwriteException) {
             _user.value = null
             Log.e("AccountService", "Registration error", e)
+
+            false
         }
     }
 
