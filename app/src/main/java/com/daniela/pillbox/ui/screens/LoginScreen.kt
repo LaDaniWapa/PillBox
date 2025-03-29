@@ -28,18 +28,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.R
 import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
+import com.daniela.pillbox.viewmodels.LoginViewModel
 
 data class LoginScreen(val modifier: Modifier) : Screen {
     @Composable
     override fun Content() {
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
+        val vm = rememberScreenModel { LoginViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
         Column(
@@ -48,8 +49,6 @@ data class LoginScreen(val modifier: Modifier) : Screen {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceAround
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
-
             // Logo
             Icon(
                 painter = painterResource(R.drawable.pillbox_logo),
@@ -61,7 +60,7 @@ data class LoginScreen(val modifier: Modifier) : Screen {
             )
 
             Column(
-                modifier = modifier.padding(24.dp),
+                modifier = modifier.padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -69,32 +68,35 @@ data class LoginScreen(val modifier: Modifier) : Screen {
 
                 // Email TextField
                 LabelTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    value = vm.email,
+                    onValueChange = { vm.updateEmail(it) },
                     label = stringResource(R.string.email),
-                    value = email,
-                    onValueChange = { email = it },
                     placeholder = stringResource(R.string.email_example),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = vm.emailError != null,
+                    supportingText = vm.emailError?.let { stringResource(it) }
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(Modifier.height(16.dp))
 
                 // Password TextField
                 LabelTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    value = vm.password,
+                    onValueChange = { vm.updatePassword(it) },
                     label = stringResource(R.string.password),
-                    value = password,
-                    onValueChange = { password = it },
                     placeholder = stringResource(R.string.password_example),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = vm.passwordError != null,
+                    supportingText = vm.passwordError?.let { stringResource(it) }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Login Button
                 MyButton(
-                    onClick = { navigator.replaceAll(HomeScreen(modifier)) },
+                    onClick = { vm.login() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.login), fontSize = 16.sp)

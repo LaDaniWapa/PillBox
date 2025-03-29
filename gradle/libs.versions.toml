@@ -1,7 +1,6 @@
 [versions]
 agp = "8.9.1"
 coreSplashscreen = "1.0.1"
-koinAndroid = "3.5.0"
 kotlin = "2.1.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -12,7 +11,8 @@ activityCompose = "1.10.1"
 composeBom = "2025.03.01"
 appwriteSDK = "7.0.0"
 uiTextGoogleFonts = "1.7.8"
-voyager = "1.1.0-beta03"
+voyagerVersion = "1.1.0-beta03"
+koinVersion = "3.5.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,11 +35,15 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 appwrite-sdk = { module = "io.appwrite:sdk-for-android", version.ref = "appwriteSDK" }
 
 # Voyager
-koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
-voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager" }
-voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
-voyager-screenModel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
-voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
+voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyagerVersion" }
+voyager-screenModel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyagerVersion" }
+voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyagerVersion" }
+voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyagerVersion" }
+
+#Koin
+koin-core = {module = "io.insert-koin:koin-core", version.ref="koinVersion"}
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinVersion" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

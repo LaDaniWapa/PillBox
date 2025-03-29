@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">PillBox</string>
     <string name="welcome_msg">Welcome!</string>
-    <string name="email_example">example@gmail.com</string>
     <string name="email">Email</string>
+    <string name="email_example">example@gmail.com</string>
     <string name="password">Password</string>
     <string name="password_example" translatable="false">*****</string>
     <string name="login">Log in</string>
@@ -12,4 +12,11 @@
     <string name="repeat_password">Repeat password</string>
     <string name="signup">Sign up</string>
     <string name="already_have_account_login">Already have an account? Log in</string>
+    <string name="error_name_required">Please enter your name</string>
+    <string name="error_email_required">Please enter your email</string>
+    <string name="error_email_invalid">Invalid email format</string>
+    <string name="error_password_required">Please enter a password</string>
+    <string name="error_password_length">Password must be at least 8 characters</string>
+    <string name="error_confirm_password_required">Please confirm your password</string>
+    <string name="error_passwords_mismatch">Passwords don\'t match</string>
 </resources>

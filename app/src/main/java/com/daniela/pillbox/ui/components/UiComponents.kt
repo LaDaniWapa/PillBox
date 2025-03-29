@@ -27,6 +27,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -51,7 +52,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -69,6 +69,8 @@ fun LabelTextField(
     onValueChange: (String) -> Unit = {},
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    isError: Boolean = false,
+    supportingText: String? = null
 ) {
     Column {
         //External label
@@ -80,7 +82,7 @@ fun LabelTextField(
         )
 
         // TextField
-        TextField(
+        OutlinedTextField(
             modifier = modifier,
             value = value,
             onValueChange = onValueChange,
@@ -91,6 +93,11 @@ fun LabelTextField(
             },
             keyboardOptions = keyboardOptions,
             visualTransformation = visualTransformation,
+            isError = isError,
+            supportingText = {
+                if (supportingText != null)
+                    Text(text = supportingText)
+            },
 
             shape = RoundedCornerShape(10.dp),
             singleLine = true,
@@ -254,7 +261,7 @@ fun DropDownMenu(
             value = list[selectedIndex],
             onValueChange = {},
             readOnly = true,
-            modifier = Modifier.menuAnchor(),
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
             label = { Text(label) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)

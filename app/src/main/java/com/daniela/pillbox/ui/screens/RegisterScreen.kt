@@ -12,14 +12,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -28,29 +23,27 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.R
 import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
+import com.daniela.pillbox.viewmodels.RegisterViewModel
 
-data class RegisterScreen(val modifier: Modifier) : Screen {
+data class RegisterScreen(val modifier: Modifier = Modifier) : Screen {
     @Composable
     override fun Content() {
-        var name by remember { mutableStateOf("") }
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var confirmPassword by remember { mutableStateOf("") }
-
+        val vm: RegisterViewModel = rememberScreenModel { RegisterViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
         Column(
-            modifier = modifier.padding(horizontal =  16.dp).verticalScroll(rememberScrollState()),
+            modifier = modifier
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceAround
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
-
             // Logo
             Icon(
                 painter = painterResource(R.drawable.pillbox_logo),
@@ -62,62 +55,70 @@ data class RegisterScreen(val modifier: Modifier) : Screen {
             )
 
             Column(
-                modifier = modifier.padding(24.dp),
+                modifier = modifier.padding(horizontal = 24.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Name TextField
                 LabelTextField(
-                    value = name,
-                    onValueChange = { name = it },
+                    value = vm.name,
+                    onValueChange = { vm.updateName(it) },
                     label = stringResource(R.string.name),
                     placeholder = stringResource(R.string.name_example),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = vm.nameError != null,
+                    supportingText = vm.nameError?.let { stringResource(it) }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Email TextField
                 LabelTextField(
-                    value = email,
-                    onValueChange = { email = it },
+                    value = vm.email,
+                    onValueChange = { vm.updateEmail(it) },
                     label = stringResource(R.string.email),
                     placeholder = stringResource(R.string.email_example),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = vm.emailError != null,
+                    supportingText = vm.emailError?.let { stringResource(it) }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Password TextField
                 LabelTextField(
-                    value = password,
-                    onValueChange = { password = it },
+                    value = vm.password,
+                    onValueChange = { vm.updatePassword(it) },
                     label = stringResource(R.string.password),
                     placeholder = stringResource(R.string.password_example),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = vm.passwordError != null,
+                    supportingText = vm.passwordError?.let { stringResource(it) }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Confirm Password TextField
                 LabelTextField(
-                    value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
+                    value = vm.confirmPassword,
+                    onValueChange = { vm.updateConfirmPassword(it) },
                     label = stringResource(R.string.repeat_password),
                     placeholder = stringResource(R.string.password_example),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = vm.confirmPasswordError != null,
+                    supportingText = vm.confirmPasswordError?.let { stringResource(it) }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Sign Up Button
                 MyButton(
-                    onClick = { navigator.replaceAll(LoginScreen(modifier)) },
+                    onClick = { vm.registerUser() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = stringResource(R.string.signup), fontSize = 16.sp)

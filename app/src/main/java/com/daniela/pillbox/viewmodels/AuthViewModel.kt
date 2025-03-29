@@ -6,6 +6,8 @@ import com.daniela.pillbox.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 
 class AuthViewModel(val repository: AuthRepository) : ViewModel() {
+    val user = repository.user
+
     fun register(email: String, password: String, name: String) {
         viewModelScope.launch {
             repository.register(email, password, name)
