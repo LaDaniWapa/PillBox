@@ -47,12 +47,16 @@ dependencies {
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.screenModel)
     implementation(libs.voyager.transitions)
+    implementation(libs.voyager.koin)
 
     // Google Fonts
     implementation(libs.androidx.ui.text.google.fonts)
 
     // Splash screen
     implementation(libs.androidx.core.splashscreen)
+
+    // Koin
+    implementation(libs.koin.android)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
