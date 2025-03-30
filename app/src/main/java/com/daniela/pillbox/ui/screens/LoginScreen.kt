@@ -1,6 +1,5 @@
 package com.daniela.pillbox.ui.screens
 
-import HomeScreen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,10 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +31,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.R
 import com.daniela.pillbox.ui.components.LabelTextField
@@ -55,15 +51,25 @@ data class LoginScreen(val modifier: Modifier) : Screen {
         }
     }
 
+    private suspend fun checkLoggedIn(vm: LoginViewModel, navigator: Navigator) {
+        val loggedUser = vm.getLoggedInUser()
+        loggedUser?.let { user -> navigator.replaceAll(HomeScreen(modifier = modifier, user = user)) }
+    }
 
     @Composable
     override fun Content() {
         val vm = rememberVoyagerScreenModel<LoginViewModel>()
         val navigator = LocalNavigator.currentOrThrow
 
+        LaunchedEffect(Unit) {
+            checkLoggedIn(vm, navigator)
+        }
+
         LaunchedEffect(vm.loginSuccess) {
             vm.loginSuccess.collect { success ->
-                if (success) navigator.replaceAll(HomeScreen(modifier))
+                if (success) {
+                    checkLoggedIn(vm, navigator)
+                }
             }
         }
 

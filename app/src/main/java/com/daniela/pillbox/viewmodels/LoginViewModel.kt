@@ -8,7 +8,8 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
 import com.daniela.pillbox.data.repository.AuthRepository
-import com.daniela.pillbox.utils.AuthErrorHandler
+import com.daniela.pillbox.utils.Helper
+import io.appwrite.models.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val authRepository: AuthRepository,
-    private val authErrorHandler: AuthErrorHandler,
+    private val authErrorHandler: Helper,
     private val ctx: Context,
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -53,6 +54,7 @@ class LoginViewModel(
         passwordError = null
     }
 
+    // Methods
     fun login() {
         if (!validateInputs()) return
 
@@ -75,6 +77,7 @@ class LoginViewModel(
         }
     }
 
+    suspend fun getLoggedInUser() = authRepository.getLoggedInUser()
 
     private fun validateInputs(): Boolean {
         // Reset errors

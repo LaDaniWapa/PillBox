@@ -5,7 +5,7 @@ import com.daniela.pillbox.R
 import io.appwrite.exceptions.AppwriteException
 import java.io.IOException
 
-class AuthErrorHandler(private val ctx: Context) {
+class Helper(private val ctx: Context) {
     fun handleRegistrationError(e: Exception): String {
         return when (e) {
             is AppwriteException -> {

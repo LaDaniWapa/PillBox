@@ -8,19 +8,17 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
 import com.daniela.pillbox.data.repository.AuthRepository
-import com.daniela.pillbox.utils.AuthErrorHandler
-import io.appwrite.exceptions.AppwriteException
+import com.daniela.pillbox.utils.Helper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import java.io.IOException
 
 class RegisterViewModel(
     private val authRepository: AuthRepository,
-    private val authErrorHandler: AuthErrorHandler,
+    private val authErrorHandler: Helper,
     private val ctx: Context,
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
