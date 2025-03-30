@@ -38,16 +38,7 @@ import com.daniela.pillbox.viewmodels.RegisterViewModel
 import org.koin.compose.getKoin
 import org.koin.core.parameter.parametersOf
 
-data class RegisterScreen(val modifier: Modifier = Modifier) : Screen {
-    @Composable
-    inline fun <reified T : ScreenModel> rememberVoyagerScreenModel(): T {
-        val koin = getKoin()
-        val context = LocalContext.current
-        return rememberScreenModel {
-            koin.get(parameters = { parametersOf(context) })
-        }
-    }
-
+data class RegisterScreen(val modifier: Modifier = Modifier) : BaseScreen() {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow

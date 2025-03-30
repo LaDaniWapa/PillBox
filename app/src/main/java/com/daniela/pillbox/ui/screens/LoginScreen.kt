@@ -37,20 +37,8 @@ import com.daniela.pillbox.R
 import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
 import com.daniela.pillbox.viewmodels.LoginViewModel
-import org.koin.compose.getKoin
-import org.koin.core.parameter.parametersOf
 
-
-data class LoginScreen(val modifier: Modifier) : Screen {
-    @Composable
-    inline fun <reified T : ScreenModel> rememberVoyagerScreenModel(): T {
-        val koin = getKoin()
-        val context = LocalContext.current
-        return rememberScreenModel {
-            koin.get(parameters = { parametersOf(context) })
-        }
-    }
-
+data class LoginScreen(val modifier: Modifier) : BaseScreen() {
     private suspend fun checkLoggedIn(vm: LoginViewModel, navigator: Navigator) {
         val loggedUser = vm.getLoggedInUser()
         loggedUser?.let { user -> navigator.replaceAll(HomeScreen(modifier = modifier, user = user)) }
