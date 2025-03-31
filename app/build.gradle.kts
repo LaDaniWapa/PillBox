@@ -49,8 +49,9 @@ dependencies {
     implementation(libs.voyager.transitions)
     implementation(libs.voyager.koin)
 
-    // Google Fonts
+    // Google things
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.material.icons.extended)
 
     // Splash screen
     implementation(libs.androidx.core.splashscreen)

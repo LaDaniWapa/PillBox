@@ -19,5 +19,14 @@ abstract class BaseScreen : Screen {
     }
 
     @Composable
+    inline fun <reified T : ScreenModel> rememberVoyagerScreenModel(vararg params: Any): T {
+        val koin = getKoin()
+        val context = LocalContext.current
+        return rememberScreenModel {
+            koin.get(parameters = { parametersOf(context, *params) })
+        }
+    }
+
+    @Composable
     abstract override fun Content()
 }

@@ -9,7 +9,6 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.utils.Helper
-import io.appwrite.models.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

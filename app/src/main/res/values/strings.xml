@@ -29,4 +29,10 @@
     <string name="error_500">Server error</string>
     <string name="error_network">Network connection failed</string>
     <string name="error_unknown">An unexpected error occurred: %s</string>
+
+    <string name="morning_greeting">Good morning</string>
+    <string name="afternoon_greeting">Good afternoon</string>
+    <string name="evening_greeting">Good evening</string>
+    <string name="night_greeting">Good night</string>
+    <string name="greeting_format">%1$s, %2$s!</string>
 </resources>
