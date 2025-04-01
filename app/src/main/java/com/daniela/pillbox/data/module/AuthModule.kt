@@ -7,10 +7,8 @@ import com.daniela.pillbox.viewmodels.AuthViewModel
 import com.daniela.pillbox.viewmodels.HomeViewModel
 import com.daniela.pillbox.viewmodels.LoginViewModel
 import com.daniela.pillbox.viewmodels.RegisterViewModel
-import io.appwrite.models.User
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val authModule = module {

@@ -28,7 +28,6 @@ class HomeViewModel(
     val loggedOut = MutableStateFlow(false)
 
     // Attributes
-    // val navigator = LocalNavigator.currentOrThrow
     val medications = generateSampleMedications()
     val checkedStates = mutableStateMapOf<Int, Boolean>()
     var showMenu by mutableStateOf(false)
@@ -47,7 +46,7 @@ class HomeViewModel(
     // Methods
     fun logout() {
         coroutineScope.launch {
-            //authRepository.logout()
+            authRepository.logout()
             loggedOut.value = true
         }
     }

@@ -96,4 +96,15 @@ class AuthRepository(val ctx: Context) {
             true
         }
     }
+
+    suspend fun logout() {
+        val account = Account(client)
+
+        try {
+            account.deleteSession("current")
+            Log.d("AccountService", "Logged out successfully")
+        } catch (e: AppwriteException) {
+            Log.e("AccountService", "Logout error", e)
+        }
+    }
 }

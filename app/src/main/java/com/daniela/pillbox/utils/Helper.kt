@@ -17,6 +17,7 @@ class Helper(private val ctx: Context) {
                     else -> ctx.getString(R.string.error_unknown, e.message)
                 }
             }
+
             is IOException -> ctx.getString(R.string.error_network)
             else -> ctx.getString(R.string.error_unknown)
         }

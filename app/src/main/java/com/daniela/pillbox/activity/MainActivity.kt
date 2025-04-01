@@ -45,8 +45,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
-                    Column (
-                        modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .padding(horizontal = 16.dp)
                     ) {
                         Navigator(LoginScreen())
                     }
