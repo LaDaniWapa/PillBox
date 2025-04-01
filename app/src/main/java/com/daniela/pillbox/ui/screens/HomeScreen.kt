@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
@@ -87,13 +89,18 @@ class HomeScreen : BaseScreen() {
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        vm.medications.forEachIndexed { index, medication ->
-            MedicationItem(
-                medication = medication,
-                isChecked = vm.checkedStates[index] == true,
-                onCheckedChange = { vm.checkedStates[index] = it }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(vm.medications.size) { index ->
+                MedicationItem(
+                    medication = vm.medications[index],
+                    isChecked = vm.checkedStates[index] == true,
+                    onCheckedChange = { vm.checkedStates[index] = it }
+                )
+            }
+
         }
     }
 }
