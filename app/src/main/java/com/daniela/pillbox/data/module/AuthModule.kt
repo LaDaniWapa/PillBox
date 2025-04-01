@@ -10,6 +10,7 @@ import com.daniela.pillbox.viewmodels.RegisterViewModel
 import io.appwrite.models.User
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val authModule = module {
@@ -25,7 +26,7 @@ val authModule = module {
         LoginViewModel(authRepository = get(), authErrorHandler = get(), ctx = ctx)
     }
 
-    factory { (ctx: Context, user: User<Map<String, Any>>) ->
-        HomeViewModel(authRepository = get(), ctx = ctx, user = user)
+    factory { (ctx: Context) ->
+        HomeViewModel(authRepository = get(), ctx = ctx)
     }
 }

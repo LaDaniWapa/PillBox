@@ -32,7 +32,7 @@ import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
 import com.daniela.pillbox.viewmodels.RegisterViewModel
 
-data class RegisterScreen(val modifier: Modifier = Modifier) : BaseScreen() {
+class RegisterScreen : BaseScreen() {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -41,9 +41,7 @@ data class RegisterScreen(val modifier: Modifier = Modifier) : BaseScreen() {
         // TODO: Proper navigation with newly created user
 
         Column(
-            modifier = modifier
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceAround
         ) {
             // Logo
@@ -57,7 +55,7 @@ data class RegisterScreen(val modifier: Modifier = Modifier) : BaseScreen() {
             )
 
             Column(
-                modifier = modifier.padding(horizontal = 24.dp),
+                modifier = Modifier.padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -154,7 +152,7 @@ data class RegisterScreen(val modifier: Modifier = Modifier) : BaseScreen() {
 
                 // Login TextButton
                 TextButton(
-                    onClick = { navigator.replaceAll(LoginScreen(modifier)) },
+                    onClick = { navigator.replaceAll(LoginScreen()) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(

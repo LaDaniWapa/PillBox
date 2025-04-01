@@ -34,16 +34,11 @@ import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
 import com.daniela.pillbox.viewmodels.LoginViewModel
 
-data class LoginScreen(val modifier: Modifier) : BaseScreen() {
+class LoginScreen : BaseScreen() {
     private suspend fun checkLoggedIn(vm: LoginViewModel, navigator: Navigator) {
         val loggedUser = vm.getLoggedInUser()
         loggedUser?.let { user ->
-            navigator.replaceAll(
-                HomeScreen(
-                    modifier = modifier,
-                    user = user
-                )
-            )
+            navigator.replaceAll(HomeScreen())
         }
     }
 
@@ -65,9 +60,7 @@ data class LoginScreen(val modifier: Modifier) : BaseScreen() {
         }
 
         Column(
-            modifier = modifier
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceAround
         ) {
             // Logo
@@ -81,7 +74,7 @@ data class LoginScreen(val modifier: Modifier) : BaseScreen() {
             )
 
             Column(
-                modifier = modifier.padding(horizontal = 24.dp),
+                modifier = Modifier.padding(horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -147,7 +140,7 @@ data class LoginScreen(val modifier: Modifier) : BaseScreen() {
 
                 // Create Account Text
                 TextButton(
-                    onClick = { navigator.replaceAll(RegisterScreen(modifier)) }) {
+                    onClick = { navigator.replaceAll(RegisterScreen()) }) {
                     Text(stringResource(R.string.no_account_signup), fontSize = 14.sp)
                 }
             }

@@ -6,15 +6,23 @@ import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import cafe.adriel.voyager.navigator.Navigator
+import com.daniela.pillbox.data.module.authModule
 import com.daniela.pillbox.ui.screens.LoginScreen
 import com.daniela.pillbox.ui.theme.AppTheme
+import org.koin.androidx.compose.KoinAndroidContext
+import org.koin.compose.KoinApplication
+import org.koin.core.KoinApplication
+import org.koin.core.context.KoinContext
+import org.koin.dsl.module
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +45,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
-                    Navigator(LoginScreen(modifier = Modifier.Companion.padding(innerPadding)))
+                    Column (
+                        modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp)
+                    ) {
+                        Navigator(LoginScreen())
+                    }
                 }
             }
         }

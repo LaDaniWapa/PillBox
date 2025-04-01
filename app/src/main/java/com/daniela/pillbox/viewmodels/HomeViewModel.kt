@@ -15,13 +15,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class HomeViewModel(
     private val authRepository: AuthRepository,
     private val ctx: Context,
-    private val user: User<Map<String, Any>>,
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     val loggedOut = MutableStateFlow(false)
@@ -31,6 +32,9 @@ class HomeViewModel(
     val medications = generateSampleMedications()
     val checkedStates = mutableStateMapOf<Int, Boolean>()
     var showMenu by mutableStateOf(false)
+
+    private val _user = MutableStateFlow<User<Map<String, Any>>?>(null)
+    val user: StateFlow<User<Map<String, Any>>?> = _user.asStateFlow()
 
     fun getGreeting(): String {
         return ctx.getString(
@@ -45,6 +49,12 @@ class HomeViewModel(
         coroutineScope.launch {
             //authRepository.logout()
             loggedOut.value = true
+        }
+    }
+
+    private fun loadUser() {
+        coroutineScope.launch {
+            _user.value = authRepository.getLoggedInUser()
         }
     }
 
@@ -69,7 +79,112 @@ class HomeViewModel(
             time = "06:00 PM",
             instructions = "After dinner",
             iconName = "capsule"
-        )
+        ),
+        Medication(
+            name = "Aspirin",
+            dosage = "81 mg",
+            time = "08:00 AM",
+            instructions = "With breakfast",
+            iconName = "heart"
+        ),
+        Medication(
+            name = "Lisinopril",
+            dosage = "10 mg",
+            time = "12:00 PM",
+            instructions = "With water",
+            iconName = "pill"
+        ),
+        Medication(
+            name = "Metformin",
+            dosage = "500 mg",
+            time = "06:00 PM",
+            instructions = "After dinner",
+            iconName = "capsule"
+        ),
+        Medication(
+            name = "Aspirin",
+            dosage = "81 mg",
+            time = "08:00 AM",
+            instructions = "With breakfast",
+            iconName = "heart"
+        ),
+        Medication(
+            name = "Lisinopril",
+            dosage = "10 mg",
+            time = "12:00 PM",
+            instructions = "With water",
+            iconName = "pill"
+        ),
+        Medication(
+            name = "Metformin",
+            dosage = "500 mg",
+            time = "06:00 PM",
+            instructions = "After dinner",
+            iconName = "capsule"
+        ),
+        Medication(
+            name = "Aspirin",
+            dosage = "81 mg",
+            time = "08:00 AM",
+            instructions = "With breakfast",
+            iconName = "heart"
+        ),
+        Medication(
+            name = "Lisinopril",
+            dosage = "10 mg",
+            time = "12:00 PM",
+            instructions = "With water",
+            iconName = "pill"
+        ),
+        Medication(
+            name = "Metformin",
+            dosage = "500 mg",
+            time = "06:00 PM",
+            instructions = "After dinner",
+            iconName = "capsule"
+        ),
+        Medication(
+            name = "Aspirin",
+            dosage = "81 mg",
+            time = "08:00 AM",
+            instructions = "With breakfast",
+            iconName = "heart"
+        ),
+        Medication(
+            name = "Lisinopril",
+            dosage = "10 mg",
+            time = "12:00 PM",
+            instructions = "With water",
+            iconName = "pill"
+        ),
+        Medication(
+            name = "Metformin",
+            dosage = "500 mg",
+            time = "06:00 PM",
+            instructions = "After dinner",
+            iconName = "capsule"
+        ),
+        Medication(
+            name = "Aspirin",
+            dosage = "81 mg",
+            time = "08:00 AM",
+            instructions = "With breakfast",
+            iconName = "heart"
+        ),
+        Medication(
+            name = "Lisinopril",
+            dosage = "10 mg",
+            time = "12:00 PM",
+            instructions = "With water",
+            iconName = "pill"
+        ),
+        Medication(
+            name = "Metformin",
+            dosage = "500 mg",
+            time = "06:00 PM",
+            instructions = "After dinner",
+            iconName = "capsule"
+        ),
     )
 
     private fun getTimeBasedGreeting(): String {
@@ -85,9 +200,11 @@ class HomeViewModel(
     }
 
     private fun getDisplayName(): String {
+        val currentUser = _user.value ?: return "User" // Early return if null
+
         return when {
-            user.name.isNotEmpty() -> user.name
-            user.email.isNotEmpty() -> user.email.substringBefore("@")
+            currentUser.name.isNotEmpty() -> currentUser.name
+            currentUser.email.isNotEmpty() -> currentUser.email.substringBefore("@")
             else -> "User" // Fallback
         }
     }
