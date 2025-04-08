@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
 import com.daniela.pillbox.data.models.Medication
+import com.daniela.pillbox.data.models.Schedule
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.utils.capitalized
 import io.appwrite.models.User
@@ -108,131 +109,34 @@ class HomeViewModel(
 
     private fun generateSampleMedications() = listOf(
         Medication(
-            name = "Aspirin",
-            dosage = "81 mg",
-            time = "08:00 AM",
-            instructions = "With breakfast",
-            iconName = "heart"
-        ),
-        Medication(
-            name = "Lisinopril",
-            dosage = "10 mg",
-            time = "12:00 PM",
-            instructions = "With water",
+            id = "med123",
+            userId = "",
+            name = "Amoxicillin",
+            dosage = "500",
+            dosageUnit = "mg",
+            type = "capsule",
+            schedule = Schedule(
+                timesPerDay = 2,
+                specificTimes = listOf("08:00", "20:00"),
+                daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
+            ),
+            instructions = "Take with food",
             iconName = "pill"
         ),
         Medication(
-            name = "Metformin",
-            dosage = "500 mg",
-            time = "06:00 PM",
-            instructions = "After dinner",
-            iconName = "capsule"
-        ),
-        Medication(
-            name = "Aspirin",
-            dosage = "81 mg",
-            time = "08:00 AM",
-            instructions = "With breakfast",
-            iconName = "heart"
-        ),
-        Medication(
-            name = "Lisinopril",
-            dosage = "10 mg",
-            time = "12:00 PM",
-            instructions = "With water",
-            iconName = "pill"
-        ),
-        Medication(
-            name = "Metformin",
-            dosage = "500 mg",
-            time = "06:00 PM",
-            instructions = "After dinner",
-            iconName = "capsule"
-        ),
-        Medication(
-            name = "Aspirin",
-            dosage = "81 mg",
-            time = "08:00 AM",
-            instructions = "With breakfast",
-            iconName = "heart"
-        ),
-        Medication(
-            name = "Lisinopril",
-            dosage = "10 mg",
-            time = "12:00 PM",
-            instructions = "With water",
-            iconName = "pill"
-        ),
-        Medication(
-            name = "Metformin",
-            dosage = "500 mg",
-            time = "06:00 PM",
-            instructions = "After dinner",
-            iconName = "capsule"
-        ),
-        Medication(
-            name = "Aspirin",
-            dosage = "81 mg",
-            time = "08:00 AM",
-            instructions = "With breakfast",
-            iconName = "heart"
-        ),
-        Medication(
-            name = "Lisinopril",
-            dosage = "10 mg",
-            time = "12:00 PM",
-            instructions = "With water",
-            iconName = "pill"
-        ),
-        Medication(
-            name = "Metformin",
-            dosage = "500 mg",
-            time = "06:00 PM",
-            instructions = "After dinner",
-            iconName = "capsule"
-        ),
-        Medication(
-            name = "Aspirin",
-            dosage = "81 mg",
-            time = "08:00 AM",
-            instructions = "With breakfast",
-            iconName = "heart"
-        ),
-        Medication(
-            name = "Lisinopril",
-            dosage = "10 mg",
-            time = "12:00 PM",
-            instructions = "With water",
-            iconName = "pill"
-        ),
-        Medication(
-            name = "Metformin",
-            dosage = "500 mg",
-            time = "06:00 PM",
-            instructions = "After dinner",
-            iconName = "capsule"
-        ),
-        Medication(
-            name = "Aspirin",
-            dosage = "81 mg",
-            time = "08:00 AM",
-            instructions = "With breakfast",
-            iconName = "heart"
-        ),
-        Medication(
-            name = "Lisinopril",
-            dosage = "10 mg",
-            time = "12:00 PM",
-            instructions = "With water",
-            iconName = "pill"
-        ),
-        Medication(
-            name = "Metformin",
-            dosage = "500 mg",
-            time = "06:00 PM",
-            instructions = "After dinner",
-            iconName = "capsule"
-        ),
+            id = "med456",
+            userId = "",
+            name = "Ibuprofen",
+            dosage = "200",
+            dosageUnit = "mg",
+            type = "tablet",
+            schedule = Schedule(
+                asNeeded = true,
+                intervalHours = 6  // Minimum 6 hours between doses
+            ),
+            instructions = "Take for pain",
+            stock = 10  // 10 tablets remaining
+        )
     )
 
     private fun getTimeBasedGreeting(): String {

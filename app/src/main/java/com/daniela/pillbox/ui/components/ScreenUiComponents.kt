@@ -60,7 +60,7 @@ fun MedicationItem(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = medication.time,
+                    text = medication.schedule.specificTimes?.get(0) ?: "09:00",
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Bold
                     ),
