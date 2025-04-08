@@ -1,11 +1,9 @@
 package com.daniela.pillbox
 
 import android.content.Context
-import com.daniela.pillbox.data.services.AccountService
 import io.appwrite.Client
 
 object Appwrite {
-    lateinit var account: AccountService
     private var client: Client? = null
 
     /*fun init(ctx: Context) {
@@ -17,7 +15,10 @@ object Appwrite {
     fun getClient(ctx: Context): Client {
         synchronized(this) {
             if (client == null) {
-                client = Client(ctx).setProject("67e6c4c3002ebd01cdaa")
+                client = Client(ctx)
+                    .setEndpoint("https://appwrite.ladaniwapa.es/v1")
+                    .setProject("67d311e500265a072556")
+                    .setSelfSigned(true)
             }
             return client!!
         }

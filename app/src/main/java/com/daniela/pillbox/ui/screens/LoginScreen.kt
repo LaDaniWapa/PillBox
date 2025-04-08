@@ -27,7 +27,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.R
 import com.daniela.pillbox.ui.components.LabelTextField
@@ -35,26 +34,17 @@ import com.daniela.pillbox.ui.components.MyButton
 import com.daniela.pillbox.viewmodels.LoginViewModel
 
 class LoginScreen : BaseScreen() {
-    private suspend fun checkLoggedIn(vm: LoginViewModel, navigator: Navigator) {
-        val loggedUser = vm.getLoggedInUser()
-        loggedUser?.let { user ->
-            navigator.replaceAll(HomeScreen())
-        }
-    }
-
     @Composable
     override fun Content() {
         val vm = rememberVoyagerScreenModel<LoginViewModel>()
         val navigator = LocalNavigator.currentOrThrow
 
-        LaunchedEffect(Unit) {
-            checkLoggedIn(vm, navigator)
-        }
-
         LaunchedEffect(vm.loginSuccess) {
             vm.loginSuccess.collect { success ->
                 if (success) {
-                    checkLoggedIn(vm, navigator)
+                    vm.getLoggedInUser().let { user ->
+                        navigator.replaceAll(HomeScreen())
+                    }
                 }
             }
         }

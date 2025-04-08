@@ -4,6 +4,7 @@ import android.content.Context
 import com.daniela.pillbox.R
 import io.appwrite.exceptions.AppwriteException
 import java.io.IOException
+import java.util.Locale
 
 class Helper(private val ctx: Context) {
     fun handleRegistrationError(e: Exception): String {
@@ -21,5 +22,17 @@ class Helper(private val ctx: Context) {
             is IOException -> ctx.getString(R.string.error_network)
             else -> ctx.getString(R.string.error_unknown)
         }
+    }
+}
+
+/**
+ * Replacement for Kotlin's deprecated `capitalize()` function.
+ * https://stackoverflow.com/questions/67843986/is-there-a-shorter-replacement-for-kotlins-deprecated-string-capitalize-funct
+ */
+fun String.capitalized(): String {
+    return this.replaceFirstChar {
+        if (it.isLowerCase())
+            it.titlecase(Locale.getDefault())
+        else it.toString()
     }
 }

@@ -1,8 +1,10 @@
 package com.daniela.pillbox.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -11,11 +13,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -28,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.R
+import com.daniela.pillbox.ui.components.FullScreenLoader
 import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
 import com.daniela.pillbox.viewmodels.RegisterViewModel
@@ -38,7 +43,17 @@ class RegisterScreen : BaseScreen() {
         val navigator = LocalNavigator.currentOrThrow
         val vm: RegisterViewModel = rememberVoyagerScreenModel<RegisterViewModel>()
 
-        // TODO: Proper navigation with newly created user
+        if (vm.isLoading) {
+            FullScreenLoader()
+        }
+
+        LaunchedEffect(vm.registerSuccess) {
+            vm.registerSuccess.collect { success ->
+                if (success) {
+                    navigator.replaceAll(HomeScreen())
+                }
+            }
+        }
 
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState()),

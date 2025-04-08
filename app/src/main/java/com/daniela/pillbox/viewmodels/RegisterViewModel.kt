@@ -81,6 +81,23 @@ class RegisterViewModel(
             try {
                 val success = authRepository.register(email, password, name)
                 if (success)
+                    loginAfterRegister()
+                else
+                    apiError = ctx.getString(R.string.error_409)
+
+            } catch (e: Exception) {
+                apiError = authErrorHandler.handleRegistrationError(e)
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    private fun loginAfterRegister() {
+        coroutineScope.launch {
+            try {
+                val loggedIn = authRepository.login(email, password)
+                if (loggedIn)
                     registerSuccess.value = true
                 else
                     apiError = ctx.getString(R.string.error_409)

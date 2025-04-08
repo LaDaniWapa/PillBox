@@ -16,6 +16,7 @@ import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import cafe.adriel.voyager.navigator.Navigator
 import com.daniela.pillbox.data.module.authModule
+import com.daniela.pillbox.ui.screens.HomeScreen
 import com.daniela.pillbox.ui.screens.LoginScreen
 import com.daniela.pillbox.ui.theme.AppTheme
 import org.koin.androidx.compose.KoinAndroidContext
@@ -51,7 +52,7 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .padding(horizontal = 16.dp)
                     ) {
-                        Navigator(LoginScreen())
+                        Navigator(HomeScreen())
                     }
                 }
             }
