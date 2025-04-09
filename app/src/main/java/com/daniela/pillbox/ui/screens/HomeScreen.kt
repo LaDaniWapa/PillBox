@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.ui.components.FullScreenLoader
 import com.daniela.pillbox.ui.components.MedicationItem
@@ -54,11 +55,11 @@ class HomeScreen : BaseScreen() {
         if (vm.isLoading)
             FullScreenLoader()
         else
-            MainContent(vm)
+            MainContent(vm, navigator)
     }
 
     @Composable
-    fun MainContent(vm: HomeViewModel) {
+    fun MainContent(vm: HomeViewModel, navigator: Navigator) {
         // Header with date and menu
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -89,7 +90,7 @@ class HomeScreen : BaseScreen() {
                 ) {
                     DropdownMenuItem(
                         text = { Text("Storage") },
-                        onClick = { /*navigator.push(StorageScreen())*/ }
+                        onClick = { navigator.push(StorageScreen()) }
                     )
                     DropdownMenuItem(
                         text = { Text("Reload") },

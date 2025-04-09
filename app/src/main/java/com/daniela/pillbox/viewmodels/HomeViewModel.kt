@@ -76,6 +76,7 @@ class HomeViewModel(
             _authState.value = try {
                 authRepository.getLoggedInUser()?.let { user ->
                     _user.value = user
+                    Log.i("TAG", "USERIDDDDD: ${user.id}")
                     AuthState.Authenticated(user)
                 } ?: AuthState.Unauthenticated
             } catch (e: Exception) {

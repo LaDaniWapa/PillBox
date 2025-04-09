@@ -9,14 +9,12 @@ import io.appwrite.exceptions.AppwriteException
 import io.appwrite.models.Session
 import io.appwrite.models.User
 import io.appwrite.services.Account
-import kotlinx.coroutines.Delay
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 
-class AuthRepository(val ctx: Context) {
+class AuthRepository(ctx: Context) {
     private val _client = Appwrite.getClient(ctx)
     val client: Client get() = _client
 
@@ -48,7 +46,6 @@ class AuthRepository(val ctx: Context) {
         val account = Account(client)
 
         return try {
-            // First create the session
             val session = account.createEmailPasswordSession(email, password)
             _session.value = session
             Log.d("AccountService", "Session created: $session")

@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .padding(horizontal = 16.dp)
                     ) {
-                        Navigator(StorageScreen())
+                        Navigator(HomeScreen())
                     }
                 }
             }

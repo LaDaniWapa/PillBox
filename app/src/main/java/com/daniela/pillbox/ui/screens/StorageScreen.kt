@@ -1,12 +1,15 @@
 package com.daniela.pillbox.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,17 +17,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Medication
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,43 +52,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.daniela.pillbox.data.models.Medication
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.daniela.pillbox.data.models.Medication
 import com.daniela.pillbox.data.models.Schedule
+import com.daniela.pillbox.viewmodels.StorageViewModel
 
 class StorageScreen : BaseScreen() {
-    private val medications: List<Medication> = listOf(
-        Medication(
-            id = "1",
-            userId = "user1",
-            name = "Ibuprofen",
-            dosage = "200",
-            dosageUnit = "mg",
-            type = "tablet",
-            schedule = Schedule(timesPerDay = 2),
-            instructions = "Take with food",
-            stock = 3,
-            color = "#FF5722"
-        ),
-        Medication(
-            id = "2",
-            userId = "user1",
-            name = "Amoxicillin",
-            dosage = "500",
-            dosageUnit = "mg",
-            type = "capsule",
-            schedule = Schedule(timesPerDay = 3),
-            instructions = "Complete full course",
-            stock = 12,
-            notes = "Keep refrigerated"
-        )
-    )
-
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        val ssh = SavedStateHandle()
+        val vm = rememberVoyagerScreenModel<StorageViewModel>(ssh)
+
+        // Collect the flows as state
+        val filteredMedications by vm.filteredMedications.collectAsState()
 
         Box(
             modifier = Modifier
@@ -85,29 +82,53 @@ class StorageScreen : BaseScreen() {
                     color = MaterialTheme.colorScheme.primary
                 )
 
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    SearchBar(
+                        query = vm.searchQuery,
+                        onQueryChange = vm::onSearchQueryChanged,
+                        onSearch = { },
+                        active = false,
+                        onActiveChange = { },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopStart),
+                        placeholder = { Text("Search medications...") },
+                        leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+                        trailingIcon = {
+                            if (vm.searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { vm.onSearchQueryChanged("") }) {
+                                    Icon(Icons.Rounded.Close, contentDescription = "Clear")
+                                }
+                            }
+                        },
+                        colors = SearchBarDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        windowInsets = WindowInsets(0.dp) // Remove system insets
+                    ) {
+                        // Empty content since we're not using suggestions
+                    }
+                }
+
                 // Filter chips
-                var selectedFilter by rememberSaveable { mutableStateOf("All") }
-                Row(
+                LazyRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    listOf("All", "Low Stock", "Tablets", "Liquids").forEach { filter ->
+                    items(vm.filters) { filter ->
                         FilterChip(
-                            selected = selectedFilter == filter,
-                            onClick = { selectedFilter = filter },
+                            selected = vm.selectedFilter == filter,
+                            onClick = { vm.onFilterSelected(filter) },
                             label = { Text(filter) }
                         )
                     }
                 }
 
                 // Medication list
-                val filteredMedications = when (selectedFilter) {
-                    "Low Stock" -> medications.filter { it.stock != null && it.stock < 5 }
-                    "Tablets" -> medications.filter { it.type.equals("tablet", true) }
-                    "Liquids" -> medications.filter { it.type.equals("liquid", true) }
-                    else -> medications
-                }
-
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.BottomEnd
@@ -138,7 +159,7 @@ class StorageScreen : BaseScreen() {
                         modifier = Modifier.padding(16.dp),
                         containerColor = MaterialTheme.colorScheme.primary
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Add medication")
+                        Icon(Icons.Rounded.Add, contentDescription = "Add medication")
                     }
                 }
 
