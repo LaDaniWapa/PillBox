@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.daniela.pillbox.data.models.Medication
 import androidx.core.graphics.toColorInt
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.data.models.Schedule
 
 class StorageScreen : BaseScreen() {
@@ -70,6 +72,8 @@ class StorageScreen : BaseScreen() {
 
     @Composable
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -130,9 +134,8 @@ class StorageScreen : BaseScreen() {
                     }
 
                     FloatingActionButton(
-                        onClick = {},
-                        modifier = Modifier
-                            .padding(16.dp),
+                        onClick = { navigator.push(AddMedicationScreen()) },
+                        modifier = Modifier.padding(16.dp),
                         containerColor = MaterialTheme.colorScheme.primary
                     ) {
                         Icon(Icons.Default.Add, contentDescription = "Add medication")
@@ -170,11 +173,7 @@ private fun MedicationStorageItem(
                     modifier = Modifier
                         .size(40.dp)
                         .background(
-                            color = medication.color?.let {
-                                Color(
-                                    it.toColorInt()
-                                )
-                            }
+                            color = medication.color?.let { Color(it.toColorInt()) }
                                 ?: MaterialTheme.colorScheme.primaryContainer,
                             shape = MaterialTheme.shapes.medium
                         ),
@@ -228,10 +227,10 @@ private fun StockIndicator(stock: Int?) {
         stock < 5 -> Pair("$stock left", MaterialTheme.colorScheme.error)
         stock < 10 -> Pair(
             "$stock left",
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
         )
 
-        else -> Pair("$stock left", MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+        else -> Pair("$stock left", MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f))
     }
 
     Text(

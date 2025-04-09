@@ -1,5 +1,7 @@
 package com.daniela.pillbox.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -26,11 +30,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -48,9 +51,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -67,15 +73,19 @@ fun LabelTextField(
     modifier: Modifier = Modifier,
     label: String = "Label",
     value: String = "Text",
-    placeholder: String? = "Placeholder",
+    placeholder: String? = null,
     onValueChange: (String) -> Unit = {},
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
     visualTransformation: VisualTransformation = VisualTransformation.None,
     isError: Boolean = false,
     supportingText: String? = null,
     keyboardActions: KeyboardActions = KeyboardActions(),
+    readOnly: Boolean = false,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
+    maxLines: Int = 1
 ) {
-    Column {
+    Column(modifier = modifier) {
         //External label
         Text(
             text = label,
@@ -86,7 +96,7 @@ fun LabelTextField(
 
         // TextField
         OutlinedTextField(
-            modifier = modifier,
+            modifier = Modifier.fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
             label = null,
@@ -97,10 +107,12 @@ fun LabelTextField(
             keyboardOptions = keyboardOptions,
             visualTransformation = visualTransformation,
             isError = isError,
+            enabled = enabled,
             supportingText = {
                 if (supportingText != null)
                     Text(text = supportingText)
             },
+            maxLines = maxLines,
             keyboardActions = keyboardActions,
             shape = RoundedCornerShape(10.dp),
             singleLine = true,
@@ -109,7 +121,9 @@ fun LabelTextField(
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-            )
+            ),
+            readOnly = readOnly,
+            trailingIcon = trailingIcon
         )
     }
 }
@@ -244,6 +258,7 @@ fun SegmentedButtons(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview(showBackground = true)
@@ -253,37 +268,77 @@ fun DropDownMenu(
     onSelected: (Int) -> Unit = {},
     initialState: Boolean = false,
     label: String = "Choose an option",
+    enabled: Boolean = true
 ) {
     var expanded by remember { mutableStateOf(initialState) }
-    var selectedIndex by remember { mutableIntStateOf(0) }
+    var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    // Animation for dropdown icon rotation
+    val rotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        animationSpec = tween(durationMillis = 200)
+    )
 
     ExposedDropdownMenuBox(
         modifier = modifier.fillMaxWidth(),
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
+        onExpandedChange = { if (enabled) expanded = !expanded },
+
     ) {
-        OutlinedTextField(
+        LabelTextField(
             value = list[selectedIndex],
             onValueChange = {},
             readOnly = true,
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
-            label = { Text(label) },
+            modifier = Modifier
+                .menuAnchor()
+                .alpha(if (enabled) 1f else 0.6f),
+            label = label,
             trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier.rotate(rotation),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             },
+            enabled = enabled
         )
+
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
+            modifier = Modifier.exposedDropdownSize()
         ) {
-            list.forEach { item ->
+            list.forEachIndexed { index, item ->
                 DropdownMenuItem(
-                    text = { Text(text = item) },
+                    text = {
+                        Text(
+                            text = item,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    },
                     onClick = {
-                        selectedIndex = list.indexOf(item)
+                        selectedIndex = index
                         expanded = false
                         onSelected(selectedIndex)
                     },
+                    colors = MenuDefaults.itemColors(
+                        textColor = if (index == selectedIndex) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
+                    ),
+                    trailingIcon = if (index == selectedIndex) {
+                        {
+                            Icon(
+                                Icons.Rounded.Check,
+                                contentDescription = "Selected",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else null
                 )
             }
         }
@@ -312,7 +367,6 @@ fun FloatInputField(
     )
 }
 
-// Create an IntInputField where only whole numbers can be inputted by the user
 @Composable
 @Preview(showBackground = true)
 fun IntInputField(

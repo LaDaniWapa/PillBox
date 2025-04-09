@@ -72,17 +72,17 @@ class LoginScreen : BaseScreen() {
 
                 // Email TextField
                 LabelTextField(
-                    value = vm.email,
-                    onValueChange = { vm.updateEmail(it) },
+                    modifier = Modifier.fillMaxWidth(),
                     label = stringResource(R.string.email),
+                    value = vm.email,
                     placeholder = stringResource(R.string.email_example),
+                    onValueChange = { vm.updateEmail(it) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
                     ),
-                    modifier = Modifier.fillMaxWidth(),
                     isError = vm.emailError != null,
-                    supportingText = vm.emailError?.let { stringResource(it) }
+                    supportingText = vm.emailError?.let { stringResource(it) },
                 )
 
                 Spacer(Modifier.height(16.dp))
@@ -90,20 +90,20 @@ class LoginScreen : BaseScreen() {
                 // Password TextField
                 LabelTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = vm.password,
-                    onValueChange = { vm.updatePassword(it) },
                     label = stringResource(R.string.password),
+                    value = vm.password,
                     placeholder = stringResource(R.string.password_example),
-                    visualTransformation = PasswordVisualTransformation(),
+                    onValueChange = { vm.updatePassword(it) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done,
                     ),
+                    visualTransformation = PasswordVisualTransformation(),
+                    isError = vm.passwordError != null,
+                    supportingText = vm.passwordError?.let { stringResource(it) },
                     keyboardActions = KeyboardActions(
                         onDone = { vm.login() }
                     ),
-                    isError = vm.passwordError != null,
-                    supportingText = vm.passwordError?.let { stringResource(it) }
                 )
 
                 vm.apiError?.let { error ->

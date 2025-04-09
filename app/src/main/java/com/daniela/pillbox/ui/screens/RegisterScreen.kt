@@ -1,10 +1,8 @@
 package com.daniela.pillbox.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -13,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -76,14 +73,14 @@ class RegisterScreen : BaseScreen() {
             ) {
                 // Name TextField
                 LabelTextField(
-                    value = vm.name,
-                    onValueChange = { vm.updateName(it) },
-                    label = stringResource(R.string.name),
-                    placeholder = stringResource(R.string.name_example),
                     modifier = Modifier.fillMaxWidth(),
+                    label = stringResource(R.string.name),
+                    value = vm.name,
+                    placeholder = stringResource(R.string.name_example),
+                    onValueChange = { vm.updateName(it) },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     isError = vm.nameError != null,
                     supportingText = vm.nameError?.let { stringResource(it) },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
 
                 )
 
@@ -91,58 +88,58 @@ class RegisterScreen : BaseScreen() {
 
                 // Email TextField
                 LabelTextField(
-                    value = vm.email,
-                    onValueChange = { vm.updateEmail(it) },
-                    label = stringResource(R.string.email),
-                    placeholder = stringResource(R.string.email_example),
                     modifier = Modifier.fillMaxWidth(),
-                    isError = vm.emailError != null,
-                    supportingText = vm.emailError?.let { stringResource(it) },
+                    label = stringResource(R.string.email),
+                    value = vm.email,
+                    placeholder = stringResource(R.string.email_example),
+                    onValueChange = { vm.updateEmail(it) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
-                    )
+                    ),
+                    isError = vm.emailError != null,
+                    supportingText = vm.emailError?.let { stringResource(it) },
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Password TextField
                 LabelTextField(
-                    value = vm.password,
-                    onValueChange = { vm.updatePassword(it) },
+                    modifier = Modifier.fillMaxWidth(),
                     label = stringResource(R.string.password),
+                    value = vm.password,
                     placeholder = stringResource(R.string.password_example),
-                    visualTransformation = PasswordVisualTransformation(),
+                    onValueChange = { vm.updatePassword(it) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Next
                     ),
-                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation(),
                     isError = vm.passwordError != null,
-                    supportingText = vm.passwordError?.let { stringResource(it) }
+                    supportingText = vm.passwordError?.let { stringResource(it) },
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Confirm Password TextField
                 LabelTextField(
-                    value = vm.confirmPassword,
-                    onValueChange = { vm.updateConfirmPassword(it) },
-                    label = stringResource(R.string.repeat_password),
-                    placeholder = stringResource(R.string.password_example),
-                    visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
-                    isError = vm.confirmPasswordError != null,
-                    supportingText = vm.confirmPasswordError?.let { stringResource(it) },
+                    label = stringResource(R.string.repeat_password),
+                    value = vm.confirmPassword,
+                    placeholder = stringResource(R.string.password_example),
+                    onValueChange = { vm.updateConfirmPassword(it) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done,
                     ),
+                    visualTransformation = PasswordVisualTransformation(),
+                    isError = vm.confirmPasswordError != null,
+                    supportingText = vm.confirmPasswordError?.let { stringResource(it) },
                     keyboardActions = KeyboardActions(
                         onDone = {
                             vm.register()
                         }
-                    )
+                    ),
                 )
 
                 vm.apiError?.let { error ->
