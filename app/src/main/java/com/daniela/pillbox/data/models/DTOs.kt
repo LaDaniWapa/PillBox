@@ -23,6 +23,18 @@ data class Medication(
     // val refillInfo: RefillInfo?  // Pharmacy contacts, prescription info
 ) : Serializable
 
+data class DBMedication(
+    val userId: String,
+    val name: String,
+    val dosage: String,
+    val dosageUnit: String,
+    val type: String,
+    val stock: Int?,
+    val instructions: String?,
+    val notes: String?,
+    val color: String?,
+) : Serializable
+
 data class Schedule(
     val timesPerDay: Int? = null,  // e.g. 2 (twice daily)
     val specificTimes: List<String>? = null,  // e.g. ["08:00", "20:00"]

@@ -82,7 +82,6 @@ class HomeViewModel(
             _authState.value = try {
                 authRepository.getLoggedInUser()?.let { user ->
                     _user.value = user
-                    Log.i("TAG", "USERIDDDDD: ${user.id}")
                     AuthState.Authenticated(user)
                 } ?: AuthState.Unauthenticated
             } catch (e: Exception) {
@@ -119,7 +118,7 @@ class HomeViewModel(
     fun logout() {
         coroutineScope.launch {
             authRepository.logout()
-            loggedOut.value = true
+            _authState.value = AuthState.Unauthenticated
         }
     }
 
@@ -178,7 +177,6 @@ class HomeViewModel(
      */
     private fun getDisplayName(): String {
         val currentUser = _user.value ?: return "User" // Early return if null
-        Log.i("TAG", "getDisplayName: $currentUser")
 
         return when {
             currentUser.name.isNotEmpty() -> currentUser.name.capitalized()

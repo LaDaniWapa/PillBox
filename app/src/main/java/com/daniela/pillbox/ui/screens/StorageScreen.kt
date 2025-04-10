@@ -45,7 +45,7 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.daniela.pillbox.data.models.Medication
+import com.daniela.pillbox.data.models.DBMedication
 import com.daniela.pillbox.viewmodels.StorageViewModel
 
 /**
@@ -166,7 +166,7 @@ class StorageScreen : BaseScreen() {
  */
 @Composable
 private fun MedicationStorageItem(
-    medication: Medication,
+    medication: DBMedication,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {

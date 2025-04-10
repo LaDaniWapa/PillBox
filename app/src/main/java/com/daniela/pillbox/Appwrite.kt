@@ -22,8 +22,6 @@ object Appwrite {
                     .setEndpoint(BuildConfig.ENDPOINT)
                     .setProject(BuildConfig.PROJECT_ID)
                     .setSelfSigned(true)
-
-                Log.i("TAG", "getClient: $client")
             }
             return client!!
         }

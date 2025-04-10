@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.core.model.ScreenModel
-import com.daniela.pillbox.data.models.Medication
+import com.daniela.pillbox.data.models.DBMedication
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.data.repository.MedicationRepository
 import kotlinx.coroutines.CoroutineScope
@@ -27,10 +27,10 @@ class StorageViewModel(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     // State with SavedStateHandle persistence
-    private val _medications = MutableStateFlow(emptyList<Medication>())
+    private val _medications = MutableStateFlow(emptyList<DBMedication>())
     val medications = _medications.asStateFlow()
 
-    private val _filteredMedications = MutableStateFlow(emptyList<Medication>())
+    private val _filteredMedications = MutableStateFlow(emptyList<DBMedication>())
     val filteredMedications = _filteredMedications.asStateFlow()
 
     var selectedFilter by mutableStateOf(
@@ -114,7 +114,6 @@ class StorageViewModel(
         _filteredMedications.value = _medications.value
             .filter { med ->
                 // Search filter
-                Log.i("TAG", "applyFilters: searchQuery: $searchQuery")
                 searchQuery.isEmpty() ||
                         med.name.contains(searchQuery, ignoreCase = true) ||
                         med.type.contains(searchQuery, ignoreCase = true)
@@ -138,7 +137,7 @@ class StorageViewModel(
     /**
      * Returns the comparator for sorting the medication list.
      */
-    private fun getSortComparator(): Comparator<Medication> {
+    private fun getSortComparator(): Comparator<DBMedication> {
         return when (sortOrder) {
             "Z-A" -> compareByDescending { it.name }
             "Most Stock" -> compareByDescending { it.stock ?: 0 }
