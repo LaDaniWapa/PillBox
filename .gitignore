@@ -12,7 +12,7 @@
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+secrets.properties
 
 # Created by https://www.toptal.com/developers/gitignore/api/kotlin,android,androidstudio,jetbrains
 # Edit at https://www.toptal.com/developers/gitignore?templates=kotlin,android,androidstudio,jetbrains
