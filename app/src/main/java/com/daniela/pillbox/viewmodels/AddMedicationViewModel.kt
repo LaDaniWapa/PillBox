@@ -17,6 +17,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for the AddMedicationScreen.
+ */
 class AddMedicationViewModel(
     private val authRepository: AuthRepository,
     private val savedStateHandle: SavedStateHandle,
@@ -57,6 +60,7 @@ class AddMedicationViewModel(
     private val _events = MutableSharedFlow<AddMedicationEvent>()
     val events = _events.asSharedFlow()
 
+    // Setters
     fun onNameChange(newValue: String) {
         name = newValue
         savedStateHandle["name"] = newValue
@@ -92,9 +96,13 @@ class AddMedicationViewModel(
         savedStateHandle["notes"] = newValue
     }
 
+    /**
+     * Submits the medication form and save it to the database.
+     */
     fun onSubmit() {
         if (!isFormValid) return
 
+        // Get userId from current logged in session
         val userID = authRepository.user.value?.id
         if (userID == null) return
 
@@ -111,23 +119,33 @@ class AddMedicationViewModel(
             notes = notes.ifEmpty { null }
         )
 
+        // Send Event
         coroutineScope.launch {
             _events.emit(AddMedicationEvent.SaveMedication(newMedication))
         }
     }
 
+    /**
+     * Cancels the form and returns to the previous screen.
+     */
     fun onCancel() {
+        // Send Event
         coroutineScope.launch {
             _events.emit(AddMedicationEvent.Cancel)
         }
     }
 
-    // Garbage Collector
+    /**
+     * Called when the ViewModel is no longer used and will be destroyed.
+     */
     override fun onDispose() {
         super.onDispose()
         coroutineScope.cancel()
     }
 
+    /**
+     * Events that can be sent to the UI.
+     */
     sealed class AddMedicationEvent {
         data class SaveMedication(val medication: Medication) : AddMedicationEvent()
         object Cancel : AddMedicationEvent()

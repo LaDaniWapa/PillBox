@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 
-class AuthRepository(ctx: Context) {
+class AuthRepository(val ctx: Context) {
     private val _client = Appwrite.getClient(ctx)
     val client: Client get() = _client
 

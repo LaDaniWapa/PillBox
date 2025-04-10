@@ -1,7 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+}
+
+// Top of your app/build.gradle.kts
+val secrets = Properties().apply {
+    try {
+        load(rootProject.file("secrets.properties").inputStream())
+    } catch (e: Exception) {
+        logger.warn("secrets.properties not found! Using empty values")
+    }
 }
 
 android {
@@ -9,6 +20,12 @@ android {
     compileSdk = 35
 
     defaultConfig {
+        // Required for BuildConfig access
+        buildConfigField("String", "ENDPOINT", "\"${secrets.getProperty("APPWRITE_ENDPOINT", "")}\"")
+        buildConfigField("String", "PROJECT_ID", "\"${secrets.getProperty("APPWRITE_PROJECT_ID", "")}\"")
+        buildConfigField("String", "DATABASE_ID", "\"${secrets.getProperty("APPWRITE_DATABASE_ID", "")}\"")
+        buildConfigField("String", "MEDICATIONS_ID", "\"${secrets.getProperty("APPWRITE_MEDICATIONS_ID", "")}\"")
+
         applicationId = "com.daniela.pillbox"
         minSdk = 29
         targetSdk = 35
@@ -36,6 +53,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

@@ -22,7 +22,7 @@ class StorageViewModel(
     val authRepository: AuthRepository,
     val medsRepository: MedicationRepository,
     val savedStateHandle: SavedStateHandle,
-    val ctx: Context
+    val ctx: Context,
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -67,23 +67,7 @@ class StorageViewModel(
         loadMedications()
     }
 
-    fun loadMedications() {
-        isLoading = true
-        coroutineScope.launch {
-            try {
-                authRepository.user.value?.id?.let { userId ->
-                    val meds = medsRepository.getUserMedications(userId)
-                    _medications.value = meds
-                    applyFilters()
-                }
-            } catch (e: Exception) {
-                Log.e("TAG", "loadMedications: $e")
-            } finally {
-                isLoading = false
-            }
-        }
-    }
-
+    // Setters
     fun onFilterSelected(filter: String) {
         selectedFilter = filter
         savedStateHandle["selectedFilter"] = filter
@@ -102,6 +86,30 @@ class StorageViewModel(
         applyFilters()
     }
 
+    // Methods
+    /**
+     * Loads the list of medications from the repository.
+     */
+    fun loadMedications() {
+        isLoading = true
+        coroutineScope.launch {
+            try {
+                authRepository.user.value?.id?.let { userId ->
+                    val meds = medsRepository.getUserMedications(userId)
+                    _medications.value = meds
+                    applyFilters()
+                }
+            } catch (e: Exception) {
+                Log.e("TAG", "loadMedications: $e")
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    /**
+     * Applies the current filters to the medication list.
+     */
     private fun applyFilters() {
         _filteredMedications.value = _medications.value
             .filter { med ->
@@ -125,10 +133,11 @@ class StorageViewModel(
                 }
             }
             .sortedWith(getSortComparator())
-
-        Log.i("TAG", "applyFilters: ${_filteredMedications.value}")
     }
 
+    /**
+     * Returns the comparator for sorting the medication list.
+     */
     private fun getSortComparator(): Comparator<Medication> {
         return when (sortOrder) {
             "Z-A" -> compareByDescending { it.name }
@@ -138,11 +147,17 @@ class StorageViewModel(
         }
     }
 
+    /**
+     * Refreshes the medication list.
+     * TODO: add pull to refresh or button
+     */
     fun refresh() {
         loadMedications()
     }
 
-    // Garbage Collector
+    /**
+     * Called when the ViewModel is no longer used and will be destroyed.
+     */
     override fun onDispose() {
         super.onDispose()
         coroutineScope.cancel()

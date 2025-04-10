@@ -2,6 +2,8 @@ package com.daniela.pillbox.data.models
 
 import java.io.Serializable
 
+// Objects for transferring data
+
 data class Medication(
     val id: String,  // Changed to String (UUID or document ID)
     val userId: String,

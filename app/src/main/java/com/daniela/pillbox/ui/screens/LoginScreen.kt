@@ -33,6 +33,9 @@ import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
 import com.daniela.pillbox.viewmodels.LoginViewModel
 
+/**
+ * The login screen where users can sign in into their account.
+ */
 class LoginScreen : BaseScreen() {
     @Composable
     override fun Content() {
@@ -63,6 +66,7 @@ class LoginScreen : BaseScreen() {
                     .heightIn(max = 200.dp)
             )
 
+            // Form
             Column(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,

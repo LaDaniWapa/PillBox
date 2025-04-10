@@ -1,28 +1,43 @@
 package com.daniela.pillbox
 
 import android.content.Context
+import android.util.Log
 import io.appwrite.Client
+import io.appwrite.services.Databases
 
+/**
+ * Singleton class for Appwrite client and database services.
+ */
 object Appwrite {
     private var client: Client? = null
+    private var dbs: Databases? = null
 
-    /*fun init(ctx: Context) {
-        client = Client(ctx).setProject("67e6c4c3002ebd01cdaa")
-
-        account = AccountService(client)
-    }*/
-
+    /**
+     * Returns the Appwrite client instance.
+     */
     fun getClient(ctx: Context): Client {
         synchronized(this) {
             if (client == null) {
                 client = Client(ctx)
-                    .setEndpoint("https://appwrite.ladaniwapa.es/v1")
-                    .setProject("67d311e500265a072556")
+                    .setEndpoint(BuildConfig.ENDPOINT)
+                    .setProject(BuildConfig.PROJECT_ID)
                     .setSelfSigned(true)
+
+                Log.i("TAG", "getClient: $client")
             }
             return client!!
         }
     }
-}
 
-// https://appwrite.io/docs/tutorials/android/step-4
+    /**
+     * Returns the Appwrite database services instance.
+     */
+    fun getDatabases(ctx: Context): Databases {
+        synchronized(this) {
+            if (dbs == null) {
+                dbs = Databases(getClient(ctx))
+            }
+            return dbs!!
+        }
+    }
+}

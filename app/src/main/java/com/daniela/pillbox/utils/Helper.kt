@@ -6,7 +6,13 @@ import io.appwrite.exceptions.AppwriteException
 import java.io.IOException
 import java.util.Locale
 
+/**
+ * Helper class with utility functions.
+ */
 class Helper(private val ctx: Context) {
+    /**
+     * Handles registration errors.
+     */
     fun handleRegistrationError(e: Exception): String {
         return when (e) {
             is AppwriteException -> {

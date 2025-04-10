@@ -68,6 +68,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import java.util.Locale
 
+// Contains custom components for the app
+
 @Composable
 fun LabelTextField(
     modifier: Modifier = Modifier,

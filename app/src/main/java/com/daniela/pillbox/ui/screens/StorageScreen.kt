@@ -1,8 +1,6 @@
 package com.daniela.pillbox.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,12 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Medication
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
@@ -39,13 +33,8 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,9 +46,11 @@ import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.data.models.Medication
-import com.daniela.pillbox.data.models.Schedule
 import com.daniela.pillbox.viewmodels.StorageViewModel
 
+/**
+ * Screen for managing medication storage.
+ */
 class StorageScreen : BaseScreen() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -76,12 +67,14 @@ class StorageScreen : BaseScreen() {
                 .fillMaxSize()
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
+                // Title
                 Text(
                     text = "Medication Storage",
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
 
+                // Search bar
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -154,6 +147,7 @@ class StorageScreen : BaseScreen() {
                         }
                     }
 
+                    // Add button
                     FloatingActionButton(
                         onClick = { navigator.push(AddMedicationScreen()) },
                         modifier = Modifier.padding(16.dp),
@@ -162,16 +156,14 @@ class StorageScreen : BaseScreen() {
                         Icon(Icons.Rounded.Add, contentDescription = "Add medication")
                     }
                 }
-
-
             }
-
         }
     }
-
-
 }
 
+/**
+ * Medication card item in the storage screen.
+ */
 @Composable
 private fun MedicationStorageItem(
     medication: Medication,
@@ -239,10 +231,15 @@ private fun MedicationStorageItem(
 }
 
 
+/**
+ * Stock indicator for the medication card.
+ */
 @Composable
 private fun StockIndicator(stock: Int?) {
+    // If stock is null, don't show the indicator
     if (stock == null) return
 
+    // Determine the text and color based on the stock
     val (text, color) = when {
         stock <= 0 -> Pair("Out of stock", MaterialTheme.colorScheme.error)
         stock < 5 -> Pair("$stock left", MaterialTheme.colorScheme.error)
@@ -254,6 +251,7 @@ private fun StockIndicator(stock: Int?) {
         else -> Pair("$stock left", MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f))
     }
 
+    // Display the text with the appropriate color
     Text(
         text = text,
         color = color,

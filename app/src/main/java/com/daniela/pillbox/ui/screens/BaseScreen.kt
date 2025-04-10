@@ -8,7 +8,13 @@ import cafe.adriel.voyager.core.screen.Screen
 import org.koin.compose.getKoin
 import org.koin.core.parameter.parametersOf
 
+/**
+ * Base class for all screens in the application.
+ */
 abstract class BaseScreen : Screen {
+    /**
+     * Creates and remembers a [ScreenModel] instance.
+     */
     @Composable
     inline fun <reified T : ScreenModel> rememberVoyagerScreenModel(): T {
         val koin = getKoin()
@@ -18,6 +24,9 @@ abstract class BaseScreen : Screen {
         }
     }
 
+    /**
+     * Creates and remembers a [ScreenModel] instance with parameters.
+     */
     @Composable
     inline fun <reified T : ScreenModel> rememberVoyagerScreenModel(vararg params: Any): T {
         val koin = getKoin()
@@ -27,6 +36,9 @@ abstract class BaseScreen : Screen {
         }
     }
 
+    /**
+     * Content of the screen
+     */
     @Composable
     abstract override fun Content()
 }

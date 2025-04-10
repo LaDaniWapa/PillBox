@@ -35,6 +35,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * The main screen of the application, displaying the user's medications for the current day.
+ */
 class HomeScreen : BaseScreen() {
     @Composable
     override fun Content() {
@@ -42,6 +45,7 @@ class HomeScreen : BaseScreen() {
         val vm = rememberVoyagerScreenModel<HomeViewModel>()
         val authState = vm.authState.collectAsState()
 
+        // Observe changes in the authentication state and navigate accordingly.
         LaunchedEffect(authState) {
             vm.authState.collect { state ->
                 when (state) {
@@ -58,6 +62,12 @@ class HomeScreen : BaseScreen() {
             MainContent(vm, navigator)
     }
 
+    /**
+     * Displays the main content of the HomeScreen, including the header, date, greeting, and medication list.
+     *
+     * @param vm The HomeViewModel instance.
+     * @param navigator The Voyager navigator for handling screen transitions.
+     */
     @Composable
     fun MainContent(vm: HomeViewModel, navigator: Navigator) {
         // Header with date and menu
@@ -66,13 +76,16 @@ class HomeScreen : BaseScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Header
             Column {
+                // Date
                 Text(
                     text = SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(Date()),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
 
+                // Greeting
                 Text(
                     text = vm.getGreeting(),
                     style = MaterialTheme.typography.bodyLarge,
@@ -80,6 +93,8 @@ class HomeScreen : BaseScreen() {
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
+
+            // Options Menu
             Box {
                 IconButton(onClick = { vm.showMenu = true }) {
                     Icon(Icons.Default.MoreVert, contentDescription = "Menu")
@@ -113,7 +128,7 @@ class HomeScreen : BaseScreen() {
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        // Medication List
+        // Scrollable Medication List
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)

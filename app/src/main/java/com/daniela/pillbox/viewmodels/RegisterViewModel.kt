@@ -16,6 +16,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for the Register screen.
+ */
 class RegisterViewModel(
     private val authRepository: AuthRepository,
     private val authErrorHandler: Helper,
@@ -71,6 +74,9 @@ class RegisterViewModel(
         confirmPasswordError = null
     }
 
+    /**
+     * Registers the user with the provided email and password.
+     */
     fun register() {
         if (!validateInputs()) return
 
@@ -93,6 +99,9 @@ class RegisterViewModel(
         }
     }
 
+    /**
+     * Logs in the user after registration.
+     */
     private fun loginAfterRegister() {
         coroutineScope.launch {
             try {
@@ -110,6 +119,9 @@ class RegisterViewModel(
         }
     }
 
+    /**
+     * Validates form inputs and returns true if they are valid.
+     */
     private fun validateInputs(): Boolean {
         // Reset all errors
         nameError = null
@@ -151,7 +163,9 @@ class RegisterViewModel(
         return isValid
     }
 
-    // Garbage Collector
+    /**
+     * Called when the ViewModel is no longer used and will be destroyed.
+     */
     override fun onDispose() {
         super.onDispose()
         coroutineScope.cancel()

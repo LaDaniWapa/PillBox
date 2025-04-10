@@ -13,6 +13,9 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
+/**
+ * Koin module for handling the authentication operations.
+ */
 val authModule = module {
     single { AuthRepository(androidContext()) }
     single { Helper(androidContext()) }

@@ -32,6 +32,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.daniela.pillbox.data.models.Medication
 
+// TODO: redo this file. Merge this with the one in [StorageScreen]
+
+/**
+ * Represents an item in the medication list.
+ */
 @Composable
 fun MedicationItem(
     medication: Medication,
@@ -87,7 +92,6 @@ fun MedicationItem(
                 )
             }
 
-
             // Checkbox
             Checkbox(
                 checked = isChecked,
@@ -101,6 +105,9 @@ fun MedicationItem(
     }
 }
 
+/**
+ * Displays an icon representing the medication type.
+ */
 @Composable
 fun MedicationIcon(iconName: String?, modifier: Modifier = Modifier) {
     val icon: Pair<ImageVector, Color> = when (iconName?.lowercase()) {

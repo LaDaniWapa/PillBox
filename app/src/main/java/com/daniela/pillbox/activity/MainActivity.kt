@@ -15,20 +15,17 @@ import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import cafe.adriel.voyager.navigator.Navigator
-import com.daniela.pillbox.data.module.authModule
 import com.daniela.pillbox.ui.screens.HomeScreen
-import com.daniela.pillbox.ui.screens.LoginScreen
-import com.daniela.pillbox.ui.screens.StorageScreen
 import com.daniela.pillbox.ui.theme.AppTheme
-import org.koin.androidx.compose.KoinAndroidContext
-import org.koin.compose.KoinApplication
-import org.koin.core.KoinApplication
-import org.koin.core.context.KoinContext
-import org.koin.dsl.module
 
+/**
+ * Main activity for the app
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Splash screen
         installSplashScreen().apply {
             setOnExitAnimationListener { screen ->
                 val zoomX = ObjectAnimator.ofFloat(screen.iconView, View.SCALE_X, .6f, .0f)
@@ -43,9 +40,14 @@ class MainActivity : ComponentActivity() {
                 zoomY.start()
             }
         }
+
         enableEdgeToEdge()
+
         setContent {
             AppTheme {
+                /**
+                 * Content holder, this add needed padding values everywhere in the app
+                 */
                 Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
                     Column(
                         modifier = Modifier

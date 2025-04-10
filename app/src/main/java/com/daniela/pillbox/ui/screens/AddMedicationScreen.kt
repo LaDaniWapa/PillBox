@@ -29,6 +29,9 @@ import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
 import com.daniela.pillbox.viewmodels.AddMedicationViewModel
 
+/**
+ * Screen for adding a new medication.
+ */
 class AddMedicationScreen : BaseScreen() {
     @Composable
     override fun Content() {
@@ -45,6 +48,7 @@ class AddMedicationScreen : BaseScreen() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Back button
                 IconButton(onClick = { navigator.pop() }) {
                     Icon(
                         Icons.AutoMirrored.Rounded.ArrowBack,
@@ -53,6 +57,7 @@ class AddMedicationScreen : BaseScreen() {
                     )
                 }
 
+                // Title
                 Text(
                     text = "New Medication",
                     style = MaterialTheme.typography.headlineMedium,

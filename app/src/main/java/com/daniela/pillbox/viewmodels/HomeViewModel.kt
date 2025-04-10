@@ -24,6 +24,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
+/**
+ * ViewModel for the Home screen.
+ */
 class HomeViewModel(
     private val authRepository: AuthRepository,
     private val ctx: Context,
@@ -55,9 +58,9 @@ class HomeViewModel(
     // Medication List
     private val _medications = mutableStateListOf<Medication>()
     val medications: List<Medication> get() = _medications
-
     private val _checkedStates = mutableStateMapOf<String, Boolean>()
 
+    // Setters
     fun isMedicationTaken(id: String) = _checkedStates[id] == true
 
     fun toggleMedication(id: String) {
@@ -70,6 +73,9 @@ class HomeViewModel(
     }
 
     // Methods
+    /**
+     * Checks the authentication state of the user.
+     */
     private fun checkAuthState() {
         coroutineScope.launch {
             _authState.value = AuthState.Loading
@@ -86,6 +92,9 @@ class HomeViewModel(
         }
     }
 
+    /**
+     * Loads the list of medications from the repository.
+     */
     private fun loadMedications() {
         // TODO: get medications from authRepository
         coroutineScope.launch {
@@ -93,6 +102,9 @@ class HomeViewModel(
         }
     }
 
+    /**
+     * Returns a greeting message with the user's name.
+     */
     fun getGreeting(): String {
         return ctx.getString(
             R.string.greeting_format,
@@ -101,6 +113,9 @@ class HomeViewModel(
         )
     }
 
+    /**
+     * Logs out the current user and sets the loggedOut flag to true.
+     */
     fun logout() {
         coroutineScope.launch {
             authRepository.logout()
@@ -108,6 +123,9 @@ class HomeViewModel(
         }
     }
 
+    /**
+     * Generates a list of sample medications for testing purposes.
+     */
     private fun generateSampleMedications() = listOf(
         Medication(
             id = "med123",
@@ -140,6 +158,9 @@ class HomeViewModel(
         )
     )
 
+    /**
+     * Returns the appropriate greeting based on the current time.
+     */
     private fun getTimeBasedGreeting(): String {
         val resources = ctx.resources
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
@@ -152,6 +173,9 @@ class HomeViewModel(
         }
     }
 
+    /**
+     * Returns the display name of the current user.
+     */
     private fun getDisplayName(): String {
         val currentUser = _user.value ?: return "User" // Early return if null
         Log.i("TAG", "getDisplayName: $currentUser")
@@ -163,7 +187,9 @@ class HomeViewModel(
         }
     }
 
-    // Garbage Collector
+    /**
+     * Called when the ViewModel is no longer used and will be destroyed.
+     */
     override fun onDispose() {
         super.onDispose()
         coroutineScope.cancel()

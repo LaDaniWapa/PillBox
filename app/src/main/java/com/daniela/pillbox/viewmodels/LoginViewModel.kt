@@ -16,6 +16,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for the Login screen.
+ */
 class LoginViewModel(
     private val authRepository: AuthRepository,
     private val authErrorHandler: Helper,
@@ -54,6 +57,9 @@ class LoginViewModel(
     }
 
     // Methods
+    /**
+     * Logs in the user with the provided email and password.
+     */
     fun login() {
         if (!validateInputs()) return
 
@@ -76,8 +82,14 @@ class LoginViewModel(
         }
     }
 
+    /**
+     * Returns the current logged in user or null if none is.
+     */
     suspend fun getLoggedInUser() = authRepository.getLoggedInUser()
 
+    /**
+     * Validates the input fields and returns true if they are valid.
+     */
     private fun validateInputs(): Boolean {
         // Reset errors
         emailError = null
@@ -104,7 +116,9 @@ class LoginViewModel(
         return isValid
     }
 
-    // Garbage Collector
+    /**
+     * Called when the ViewModel is no longer used and will be destroyed.
+     */
     override fun onDispose() {
         super.onDispose()
         coroutineScope.cancel()

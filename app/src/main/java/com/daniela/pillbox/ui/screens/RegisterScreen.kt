@@ -34,16 +34,21 @@ import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
 import com.daniela.pillbox.viewmodels.RegisterViewModel
 
+/**
+ * The registration screen where users can create a new account.
+ */
 class RegisterScreen : BaseScreen() {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val vm: RegisterViewModel = rememberVoyagerScreenModel<RegisterViewModel>()
 
+        // Show a loading indicator while the registration process is in progress.
         if (vm.isLoading) {
             FullScreenLoader()
         }
 
+        // Observe the registration success state and navigate to the home screen upon successful registration.
         LaunchedEffect(vm.registerSuccess) {
             vm.registerSuccess.collect { success ->
                 if (success) {
@@ -66,6 +71,7 @@ class RegisterScreen : BaseScreen() {
                     .heightIn(max = 200.dp)
             )
 
+            // Form
             Column(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.Center,

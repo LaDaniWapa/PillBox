@@ -8,9 +8,12 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import android.content.Context
 
+/**
+ * Koin module for handling the db crud operations.
+ */
 val storageModule = module {
     single { AuthRepository(androidContext()) }
-    single { MedicationRepository() }
+    single { MedicationRepository(androidContext()) }
 
     factory { (ctx: Context, savedStateHandle: SavedStateHandle) ->
         StorageViewModel(
