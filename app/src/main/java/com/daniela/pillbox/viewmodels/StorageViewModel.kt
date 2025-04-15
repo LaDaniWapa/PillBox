@@ -1,7 +1,7 @@
 package com.daniela.pillbox.viewmodels
 
 import android.content.Context
-import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -26,30 +26,9 @@ class StorageViewModel(
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    // State with SavedStateHandle persistence
-    private val _medications = MutableStateFlow(emptyList<DBMedication>())
-    val medications = _medications.asStateFlow()
-
-    private val _filteredMedications = MutableStateFlow(emptyList<DBMedication>())
-    val filteredMedications = _filteredMedications.asStateFlow()
-
-    var selectedFilter by mutableStateOf(
-        savedStateHandle.get<String>("selectedFilter") ?: "All"
-    )
-        private set
-
-    var searchQuery by mutableStateOf(
-        savedStateHandle.get<String>("searchQuery") ?: ""
-    )
-        private set
-
-    var sortOrder by mutableStateOf(
-        savedStateHandle.get<String>("sortOrder") ?: "A-Z"
-    )
-        private set
-
-    var isLoading by mutableStateOf(false)
-        private set
+    // UiSate
+    private val _uiState = mutableStateOf(StorageUiState())
+    val uiState: State<StorageUiState> = _uiState
 
     // Available filters
     val filters = listOf(
@@ -65,44 +44,57 @@ class StorageViewModel(
 
     init {
         loadMedications()
+        setupMedicationObserver()
     }
 
     // Setters
     fun onFilterSelected(filter: String) {
-        selectedFilter = filter
-        savedStateHandle["selectedFilter"] = filter
+        _uiState.value = _uiState.value.copy(selectedFilter = filter)
         applyFilters()
     }
 
     fun onSearchQueryChanged(query: String) {
-        searchQuery = query
-        savedStateHandle["searchQuery"] = query
+        _uiState.value = _uiState.value.copy(searchQuery = query)
         applyFilters()
     }
 
     fun onSortOrderChanged(order: String) {
-        sortOrder = order
-        savedStateHandle["sortOrder"] = order
+        _uiState.value = _uiState.value.copy(sortOrder = order)
         applyFilters()
     }
 
     // Methods
+    private fun setupMedicationObserver() {
+        coroutineScope.launch {
+            medsRepository.medications.collect { meds ->
+                _uiState.value =
+                    _uiState.value.copy(allMedications = meds, isLoading = false, error = null)
+                applyFilters()
+            }
+        }
+    }
+
     /**
      * Loads the list of medications from the repository.
      */
     fun loadMedications() {
-        isLoading = true
+        _uiState.value = _uiState.value.copy(isLoading = true)
+
         coroutineScope.launch {
             try {
                 authRepository.user.value?.id?.let { userId ->
-                    val meds = medsRepository.getUserMedications(userId)
-                    _medications.value = meds
-                    applyFilters()
+                    medsRepository.getUserMedications(userId)
+                } ?: run {
+                    _uiState.value = _uiState.value.copy(
+                        error = "User not authenticated",
+                        isLoading = false
+                    )
                 }
             } catch (e: Exception) {
-                Log.e("TAG", "loadMedications: $e")
-            } finally {
-                isLoading = false
+                _uiState.value = _uiState.value.copy(
+                    error = "Failed to load medications: ${e.localizedMessage}",
+                    isLoading = false
+                )
             }
         }
     }
@@ -111,34 +103,37 @@ class StorageViewModel(
      * Applies the current filters to the medication list.
      */
     private fun applyFilters() {
-        _filteredMedications.value = _medications.value
-            .filter { med ->
-                // Search filter
-                searchQuery.isEmpty() ||
-                        med.name.contains(searchQuery, ignoreCase = true) ||
-                        med.type.contains(searchQuery, ignoreCase = true)
-            }
-            .filter { med ->
-                // Category filter
-                when (selectedFilter) {
-                    "Low Stock" -> med.stock?.let { it < 5 } == true
-                    "Tablets" -> med.type.equals("tablet", true)
-                    "Liquids" -> med.type.equals("liquid", true)
-                    "Capsules" -> med.type.equals("capsule", true)
-                    "Injections" -> med.type.equals("injection", true)
-                    "Creams" -> med.type.equals("cream", true)
-                    "Others" -> med.type.equals("other", true)
-                    else -> true // "All"
+        _uiState.value = _uiState.value.copy(
+            filteredMedications = _uiState.value.allMedications
+                .filter { med ->
+                    // Search filter
+                    _uiState.value.searchQuery.isEmpty() ||
+                            med.name.contains(_uiState.value.searchQuery, ignoreCase = true) ||
+                            med.type.contains(_uiState.value.searchQuery, ignoreCase = true)
                 }
-            }
-            .sortedWith(getSortComparator())
+                .filter { med ->
+                    // Category filter
+                    when (_uiState.value.selectedFilter) {
+                        "Low Stock" -> med.stock?.let { it < 5 } == true
+                        "Tablets" -> med.type.equals("tablet", true)
+                        "Liquids" -> med.type.equals("liquid", true)
+                        "Capsules" -> med.type.equals("capsule", true)
+                        "Injections" -> med.type.equals("injection", true)
+                        "Creams" -> med.type.equals("cream", true)
+                        "Others" -> med.type.equals("other", true)
+                        else -> true // "All"
+                    }
+                }
+                .sortedWith(getSortComparator())
+
+        )
     }
 
     /**
      * Returns the comparator for sorting the medication list.
      */
     private fun getSortComparator(): Comparator<DBMedication> {
-        return when (sortOrder) {
+        return when (_uiState.value.sortOrder) {
             "Z-A" -> compareByDescending { it.name }
             "Most Stock" -> compareByDescending { it.stock ?: 0 }
             "Least Stock" -> compareBy { it.stock ?: Int.MAX_VALUE }
@@ -161,4 +156,14 @@ class StorageViewModel(
         super.onDispose()
         coroutineScope.cancel()
     }
+
+    data class StorageUiState(
+        val allMedications: List<DBMedication> = emptyList(), // Original unfiltered list
+        val filteredMedications: List<DBMedication> = emptyList(), // Filtered results
+        val searchQuery: String = "",
+        val selectedFilter: String = "All",
+        val sortOrder: String = "A-Z",
+        val isLoading: Boolean = false,
+        val error: String? = null,
+    )
 }

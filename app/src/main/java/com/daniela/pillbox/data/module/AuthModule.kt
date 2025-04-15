@@ -1,10 +1,8 @@
 package com.daniela.pillbox.data.module
 
 import android.content.Context
-import androidx.lifecycle.SavedStateHandle
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.utils.Helper
-import com.daniela.pillbox.viewmodels.AddMedicationViewModel
 import com.daniela.pillbox.viewmodels.AuthViewModel
 import com.daniela.pillbox.viewmodels.HomeViewModel
 import com.daniela.pillbox.viewmodels.LoginViewModel
@@ -31,9 +29,5 @@ val authModule = module {
 
     factory { (ctx: Context) ->
         HomeViewModel(authRepository = get(), ctx = ctx)
-    }
-
-    factory { (ctx: Context, savedStateHandle: SavedStateHandle ) ->
-        AddMedicationViewModel(authRepository = get(), savedStateHandle = savedStateHandle, ctx = ctx)
     }
 }

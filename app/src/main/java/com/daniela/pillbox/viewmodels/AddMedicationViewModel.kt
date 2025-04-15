@@ -1,20 +1,22 @@
 package com.daniela.pillbox.viewmodels
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.core.model.ScreenModel
-import com.daniela.pillbox.data.models.Medication
-import com.daniela.pillbox.data.models.Schedule
+import com.daniela.pillbox.data.models.DBMedication
 import com.daniela.pillbox.data.repository.AuthRepository
+import com.daniela.pillbox.data.repository.MedicationRepository
+import com.daniela.pillbox.libs.colorpicker.ext.toHex
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -22,6 +24,7 @@ import kotlinx.coroutines.launch
  */
 class AddMedicationViewModel(
     private val authRepository: AuthRepository,
+    private val medsRepository: MedicationRepository,
     private val savedStateHandle: SavedStateHandle,
     private val ctx: Context,
 ) : ScreenModel {
@@ -49,16 +52,17 @@ class AddMedicationViewModel(
     var notes by mutableStateOf(savedStateHandle["notes"] ?: "")
         private set
 
+    var color by mutableStateOf(savedStateHandle["color"] ?: "#50aaff")
+        private set
+
+    val success = MutableStateFlow(false)
+
     // Validation state
     val isFormValid: Boolean
-        get() = name.isNotBlank() && dosage.isNotBlank() && instructions.isNotBlank()
+        get() = name.isNotBlank() && dosage.isNotBlank()
 
-    // Available options
+    // Available medication types
     val medicationTypes = listOf("tablet", "capsule", "liquid", "injection", "cream", "other")
-
-    // Event handling
-    private val _events = MutableSharedFlow<AddMedicationEvent>()
-    val events = _events.asSharedFlow()
 
     // Setters
     fun onNameChange(newValue: String) {
@@ -96,6 +100,11 @@ class AddMedicationViewModel(
         savedStateHandle["notes"] = newValue
     }
 
+    fun onColorChange(newValue: Color) {
+        color = '#' + newValue.toHex(includeAlpha = false)
+        savedStateHandle["color"] = color
+    }
+
     /**
      * Submits the medication form and save it to the database.
      */
@@ -106,32 +115,27 @@ class AddMedicationViewModel(
         val userID = authRepository.user.value?.id
         if (userID == null) return
 
-        val newMedication = Medication(
-            id = "",
+        val newMedication = DBMedication(
             userId = userID,
             name = name,
             dosage = dosage,
             dosageUnit = dosageUnit,
             type = type,
-            schedule = Schedule(), // Default schedule
             instructions = instructions,
             stock = stock.toIntOrNull(),
-            notes = notes.ifEmpty { null }
+            notes = notes.ifEmpty { null },
+            color = color
         )
 
         // Send Event
         coroutineScope.launch {
-            _events.emit(AddMedicationEvent.SaveMedication(newMedication))
-        }
-    }
+            try {
+                medsRepository.addUserMedication(newMedication)
+                success.value = true
+            } catch (e: Exception) {
+                Log.e("TAG", "onSubmit: $e", )
+            }
 
-    /**
-     * Cancels the form and returns to the previous screen.
-     */
-    fun onCancel() {
-        // Send Event
-        coroutineScope.launch {
-            _events.emit(AddMedicationEvent.Cancel)
         }
     }
 
@@ -141,13 +145,5 @@ class AddMedicationViewModel(
     override fun onDispose() {
         super.onDispose()
         coroutineScope.cancel()
-    }
-
-    /**
-     * Events that can be sent to the UI.
-     */
-    sealed class AddMedicationEvent {
-        data class SaveMedication(val medication: Medication) : AddMedicationEvent()
-        object Cancel : AddMedicationEvent()
     }
 }

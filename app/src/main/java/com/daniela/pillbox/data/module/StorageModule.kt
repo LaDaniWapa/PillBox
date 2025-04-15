@@ -1,18 +1,17 @@
 package com.daniela.pillbox.data.module
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.data.repository.MedicationRepository
+import com.daniela.pillbox.viewmodels.AddMedicationViewModel
 import com.daniela.pillbox.viewmodels.StorageViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
-import android.content.Context
 
 /**
  * Koin module for handling the db crud operations.
  */
 val storageModule = module {
-    single { AuthRepository(androidContext()) }
     single { MedicationRepository(androidContext()) }
 
     factory { (ctx: Context, savedStateHandle: SavedStateHandle) ->
@@ -20,6 +19,15 @@ val storageModule = module {
             savedStateHandle = savedStateHandle,
             authRepository = get(),
             medsRepository = get(),
+            ctx = ctx
+        )
+    }
+
+    factory { (ctx: Context, savedStateHandle: SavedStateHandle) ->
+        AddMedicationViewModel(
+            authRepository = get(),
+            medsRepository = get(),
+            savedStateHandle = savedStateHandle,
             ctx = ctx
         )
     }

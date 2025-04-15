@@ -1,6 +1,7 @@
 package com.daniela.pillbox.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,11 +17,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -28,11 +33,14 @@ import com.daniela.pillbox.ui.components.DropDownMenu
 import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
 import com.daniela.pillbox.viewmodels.AddMedicationViewModel
+import com.daniela.pillbox.libs.colorpicker.ColorPicker
+import com.daniela.pillbox.libs.colorpicker.ColorPickerType
 
 /**
  * Screen for adding a new medication.
  */
 class AddMedicationScreen : BaseScreen() {
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     override fun Content() {
         val ssh = SavedStateHandle()
@@ -40,6 +48,14 @@ class AddMedicationScreen : BaseScreen() {
 
         val scrollState = rememberScrollState()
         val navigator = LocalNavigator.currentOrThrow
+
+        LaunchedEffect(vm.success) {
+            vm.success.collect { success ->
+                if (success) {
+                    navigator.pop()
+                }
+            }
+        }
 
         Column(modifier = Modifier.fillMaxSize()) {
             // ActionBar and Title
@@ -146,7 +162,22 @@ class AddMedicationScreen : BaseScreen() {
                     )
                 )
 
-                // Save Button (replacement for FAB)
+                // Color Picker
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ColorPicker(
+                        onPickedColor = vm::onColorChange,
+                        type = ColorPickerType.Ring(
+                            showAlphaBar = false,
+                            initialColor = Color(vm.color.toColorInt()),
+                            ringWidth = 20.dp
+                        ),
+                    )
+                }
+
+                // Save Button
                 MyButton(
                     onClick = { vm.onSubmit() },
                     modifier = Modifier

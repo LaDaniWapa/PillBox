@@ -44,9 +44,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.data.models.DBMedication
+import com.daniela.pillbox.ui.components.FullScreenLoader
 import com.daniela.pillbox.viewmodels.StorageViewModel
+import java.lang.Error
 
 /**
  * Screen for managing medication storage.
@@ -58,9 +61,7 @@ class StorageScreen : BaseScreen() {
         val navigator = LocalNavigator.currentOrThrow
         val ssh = SavedStateHandle()
         val vm = rememberVoyagerScreenModel<StorageViewModel>(ssh)
-
-        // Collect the flows as state
-        val filteredMedications by vm.filteredMedications.collectAsState()
+        val state by vm.uiState
 
         Box(
             modifier = Modifier
@@ -81,7 +82,7 @@ class StorageScreen : BaseScreen() {
                         .padding(8.dp)
                 ) {
                     SearchBar(
-                        query = vm.searchQuery,
+                        query = state.searchQuery,
                         onQueryChange = vm::onSearchQueryChanged,
                         onSearch = { },
                         active = false,
@@ -92,7 +93,7 @@ class StorageScreen : BaseScreen() {
                         placeholder = { Text("Search medications...") },
                         leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
                         trailingIcon = {
-                            if (vm.searchQuery.isNotEmpty()) {
+                            if (state.searchQuery.isNotEmpty()) {
                                 IconButton(onClick = { vm.onSearchQueryChanged("") }) {
                                     Icon(Icons.Rounded.Close, contentDescription = "Clear")
                                 }
@@ -114,48 +115,71 @@ class StorageScreen : BaseScreen() {
                 ) {
                     items(vm.filters) { filter ->
                         FilterChip(
-                            selected = vm.selectedFilter == filter,
+                            selected = state.selectedFilter == filter,
                             onClick = { vm.onFilterSelected(filter) },
                             label = { Text(filter) }
                         )
                     }
                 }
 
-                // Medication list
+                when {
+                    state.isLoading -> FullScreenLoader()
+                    state.error != null -> ErrorView(state.error)
+                    else -> MedicationList(state.filteredMedications, navigator)
+                }
+
+            }
+        }
+    }
+
+    @Composable
+    private fun ErrorView(error: String?) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                error ?: "There was an error",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+
+    @Composable
+    private fun MedicationList(
+        filteredMedications: List<DBMedication>,
+        navigator: Navigator,
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomEnd
+        ) {
+            // Display
+            if (filteredMedications.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.BottomEnd
+                    contentAlignment = Alignment.Center
                 ) {
-                    // Display
-                    if (filteredMedications.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No medications found", style = MaterialTheme.typography.bodyLarge)
-                        }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            contentPadding = PaddingValues(top = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(filteredMedications) { medication ->
-                                MedicationStorageItem(medication = medication, onClick = {})
-                            }
-                        }
-                    }
-
-                    // Add button
-                    FloatingActionButton(
-                        onClick = { navigator.push(AddMedicationScreen()) },
-                        modifier = Modifier.padding(16.dp),
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        Icon(Icons.Rounded.Add, contentDescription = "Add medication")
+                    Text("No medications found", style = MaterialTheme.typography.bodyLarge)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentPadding = PaddingValues(top = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredMedications) { medication ->
+                        MedicationStorageItem(medication = medication, onClick = {})
                     }
                 }
+            }
+
+            // Add button
+            FloatingActionButton(
+                onClick = { navigator.push(AddMedicationScreen()) },
+                modifier = Modifier.padding(16.dp),
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(Icons.Rounded.Add, contentDescription = "Add medication")
             }
         }
     }
@@ -208,7 +232,7 @@ private fun MedicationStorageItem(
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
-                        text = "${medication.dosage} ${medication.dosageUnit} ${medication.type}",
+                        text = "${medication.dosage}${medication.dosageUnit} ${medication.type}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
