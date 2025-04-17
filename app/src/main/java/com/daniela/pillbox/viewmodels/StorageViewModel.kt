@@ -19,10 +19,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class StorageViewModel(
-    val authRepository: AuthRepository,
-    val medsRepository: MedicationRepository,
-    val savedStateHandle: SavedStateHandle,
-    val ctx: Context,
+    private val authRepository: AuthRepository,
+    private val medsRepository: MedicationRepository,
+    private val savedStateHandle: SavedStateHandle,
+    private val ctx: Context,
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -96,6 +96,12 @@ class StorageViewModel(
                     isLoading = false
                 )
             }
+        }
+    }
+
+    fun deleteMedication(medDocId: String) {
+        coroutineScope.launch {
+            medsRepository.deleteUserMedication(medDocId)
         }
     }
 

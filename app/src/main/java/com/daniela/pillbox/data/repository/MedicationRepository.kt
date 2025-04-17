@@ -34,7 +34,24 @@ class MedicationRepository(val ctx: Context) {
 
         Log.i("TAG", "getUserMedications: $documents")
 
-        _medications.value = documents.map { d -> d.data }
+        _medications.value = documents.map { d -> d.data.copy(docId = d.id) }
+    }
+
+    suspend fun deleteUserMedication(docId: String) {
+        val db = Appwrite.getDatabases(ctx)
+
+        try {
+            val res = db.deleteDocument(
+                databaseId = BuildConfig.DATABASE_ID,
+                collectionId = BuildConfig.MEDICATIONS_ID,
+                documentId = docId
+            )
+
+            if (res == true)
+                _medications.update { currentList -> currentList.filter { it.docId != docId } }
+        } catch (e: Exception) {
+            Log.e("TAG", "deleteUserMedication: $e")
+        }
     }
 
     /**
@@ -60,6 +77,5 @@ class MedicationRepository(val ctx: Context) {
         } catch (e: Exception) {
             Log.e("TAG", "addUserMedication: $e")
         }
-
     }
 }

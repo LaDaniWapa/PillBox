@@ -24,6 +24,7 @@ data class Medication(
 ) : Serializable
 
 data class DBMedication(
+    val docId: String? = null,
     val userId: String,
     val name: String,
     val dosage: String,

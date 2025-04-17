@@ -52,7 +52,7 @@ class AddMedicationViewModel(
     var notes by mutableStateOf(savedStateHandle["notes"] ?: "")
         private set
 
-    var color by mutableStateOf(savedStateHandle["color"] ?: "#50aaff")
+    var color by mutableStateOf(savedStateHandle["color"] ?: "#ff0000")
         private set
 
     val success = MutableStateFlow(false)

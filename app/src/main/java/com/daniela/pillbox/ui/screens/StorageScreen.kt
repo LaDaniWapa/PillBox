@@ -21,7 +21,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -48,8 +50,8 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.data.models.DBMedication
 import com.daniela.pillbox.ui.components.FullScreenLoader
+import com.daniela.pillbox.utils.capitalized
 import com.daniela.pillbox.viewmodels.StorageViewModel
-import java.lang.Error
 
 /**
  * Screen for managing medication storage.
@@ -125,7 +127,7 @@ class StorageScreen : BaseScreen() {
                 when {
                     state.isLoading -> FullScreenLoader()
                     state.error != null -> ErrorView(state.error)
-                    else -> MedicationList(state.filteredMedications, navigator)
+                    else -> MedicationList(state.filteredMedications, navigator, vm)
                 }
 
             }
@@ -147,6 +149,7 @@ class StorageScreen : BaseScreen() {
     private fun MedicationList(
         filteredMedications: List<DBMedication>,
         navigator: Navigator,
+        vm: StorageViewModel, // Add ViewModel parameter
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -168,7 +171,17 @@ class StorageScreen : BaseScreen() {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(filteredMedications) { medication ->
-                        MedicationStorageItem(medication = medication, onClick = {})
+                        MedicationStorageItem(
+                            medication = medication,
+                            onClick = {
+                                // go to details
+                            },
+                            onDelete = {
+                                medication.docId?.let { docId ->
+                                    vm.deleteMedication(docId)
+                                }
+                            },
+                        )
                     }
                 }
             }
@@ -192,6 +205,7 @@ class StorageScreen : BaseScreen() {
 private fun MedicationStorageItem(
     medication: DBMedication,
     onClick: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -232,23 +246,42 @@ private fun MedicationStorageItem(
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
-                        text = "${medication.dosage}${medication.dosageUnit} ${medication.type}",
+                        text = "${medication.dosage}${medication.dosageUnit} ${medication.type.capitalized()}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
 
-                // Stock indicator
-                StockIndicator(stock = medication.stock)
+                // Delete button
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = "Delete medication",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
 
-            // Additional info
-            medication.notes?.let { notes ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = notes,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 2
-                )
+            // Bottom Row: Notes + Stock
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(top = 5.dp)
+            ) {
+                // Notes (if exists)
+                medication.notes?.let { notes ->
+                    Text(
+                        text = notes,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                        modifier = Modifier.weight(1f),
+                        maxLines = 2
+                    )
+                } ?: Spacer(modifier = Modifier.weight(1f))
+
+                // Stock Indicator
+                StockIndicator(stock = medication.stock)
             }
         }
     }
@@ -262,24 +295,25 @@ private fun MedicationStorageItem(
 private fun StockIndicator(stock: Int?) {
     // If stock is null, don't show the indicator
     if (stock == null) return
-
-    // Determine the text and color based on the stock
-    val (text, color) = when {
-        stock <= 0 -> Pair("Out of stock", MaterialTheme.colorScheme.error)
-        stock < 5 -> Pair("$stock left", MaterialTheme.colorScheme.error)
-        stock < 10 -> Pair(
-            "$stock left",
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+    Badge(
+        containerColor = when {
+            stock <= 0 -> MaterialTheme.colorScheme.errorContainer
+            stock < 5 -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+            else -> MaterialTheme.colorScheme.surfaceVariant
+        },
+        contentColor = when {
+            stock <= 0 -> MaterialTheme.colorScheme.onErrorContainer
+            stock < 5 -> MaterialTheme.colorScheme.onErrorContainer
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        }
+    ) {
+        Text(
+            text = when {
+                stock <= 0 -> "Out"
+                stock < 5 -> "Low: $stock"
+                else -> "$stock left"
+            },
+            style = MaterialTheme.typography.labelSmall
         )
-
-        else -> Pair("$stock left", MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f))
     }
-
-    // Display the text with the appropriate color
-    Text(
-        text = text,
-        color = color,
-        fontSize = 14.sp,
-        fontWeight = if (stock < 5) FontWeight.Bold else FontWeight.Normal
-    )
 }
