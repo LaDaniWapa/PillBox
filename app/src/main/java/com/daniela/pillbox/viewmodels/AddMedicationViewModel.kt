@@ -121,7 +121,7 @@ class AddMedicationViewModel(
             dosage = dosage,
             dosageUnit = dosageUnit,
             type = type,
-            instructions = instructions,
+            instructions = instructions.ifEmpty { null },
             stock = stock.toIntOrNull(),
             notes = notes.ifEmpty { null },
             color = color

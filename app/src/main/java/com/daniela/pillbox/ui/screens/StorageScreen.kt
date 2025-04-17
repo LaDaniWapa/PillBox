@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
@@ -70,12 +72,27 @@ class StorageScreen : BaseScreen() {
                 .fillMaxSize()
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Title
-                Text(
-                    text = "Medication Storage",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                // Custom Top Bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { navigator.pop() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "Medication Storage",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
 
                 // Search bar
                 Box(
@@ -174,7 +191,7 @@ class StorageScreen : BaseScreen() {
                         MedicationStorageItem(
                             medication = medication,
                             onClick = {
-                                // go to details
+                                navigator.push(MedicationDetailsScreen(medication))
                             },
                             onDelete = {
                                 medication.docId?.let { docId ->
@@ -210,7 +227,8 @@ private fun MedicationStorageItem(
 ) {
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -226,7 +244,7 @@ private fun MedicationStorageItem(
                         .background(
                             color = medication.color?.let { Color(it.toColorInt()) }
                                 ?: MaterialTheme.colorScheme.primaryContainer,
-                            shape = MaterialTheme.shapes.medium
+                            shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
