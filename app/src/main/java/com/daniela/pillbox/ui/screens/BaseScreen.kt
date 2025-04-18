@@ -28,7 +28,7 @@ abstract class BaseScreen : Screen {
      * Creates and remembers a [ScreenModel] instance with parameters.
      */
     @Composable
-    inline fun <reified T : ScreenModel> rememberVoyagerScreenModel(vararg params: Any): T {
+    inline fun <reified T : ScreenModel> rememberVoyagerScreenModel(vararg params: Any?): T {
         val koin = getKoin()
         val context = LocalContext.current
         return rememberScreenModel {

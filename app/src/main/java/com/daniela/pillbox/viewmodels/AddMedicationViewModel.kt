@@ -8,7 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.core.model.ScreenModel
-import com.daniela.pillbox.data.models.DBMedication
+import com.daniela.pillbox.data.models.Medication
+import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.data.repository.MedicationRepository
 import com.daniela.pillbox.libs.colorpicker.ext.toHex
@@ -27,6 +28,7 @@ class AddMedicationViewModel(
     private val medsRepository: MedicationRepository,
     private val savedStateHandle: SavedStateHandle,
     private val ctx: Context,
+    private val medicationToEdit: MedicationWithDocId?,
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -105,6 +107,26 @@ class AddMedicationViewModel(
         savedStateHandle["color"] = color
     }
 
+    init {
+        medicationToEdit?.let {
+            name = it.name
+            dosage = it.dosage.toString()
+            dosageUnit = it.dosageUnit
+            type = it.type
+            instructions = it.instructions ?: ""
+            stock = it.stock?.toString() ?: ""
+            notes = it.notes ?: ""
+            color = it.color ?: "#ff0000"
+            savedStateHandle["name"] = name
+            savedStateHandle["dosage"] = dosage
+            savedStateHandle["dosageUnit"] = dosageUnit
+            savedStateHandle["type"] = type
+            savedStateHandle["instructions"] = instructions
+            savedStateHandle["stock"] = stock
+            savedStateHandle["notes"] = notes
+        }
+    }
+
     /**
      * Submits the medication form and save it to the database.
      */
@@ -115,7 +137,7 @@ class AddMedicationViewModel(
         val userID = authRepository.user.value?.id
         if (userID == null) return
 
-        val newMedication = DBMedication(
+        var newMedication = Medication(
             userId = userID,
             name = name,
             dosage = dosage,
@@ -127,15 +149,42 @@ class AddMedicationViewModel(
             color = color
         )
 
-        // Send Event
+        medicationToEdit?.let {
+            update(newMedication, it.docId)
+        } ?: run {
+            save(newMedication)
+        }
+
+    }
+
+    /**
+     * Saves a new medication to the database.
+     */
+    private fun save(med: Medication) {
         coroutineScope.launch {
             try {
-                medsRepository.addUserMedication(newMedication)
+                medsRepository.addUserMedication(med)
                 success.value = true
             } catch (e: Exception) {
-                Log.e("TAG", "onSubmit: $e", )
+                Log.e("TAG", "onSubmit: $e")
             }
 
+        }
+    }
+
+    /**
+     * Updates an existing medication in the database.
+     */
+    private fun update(med: Medication, docId: String?) {
+        if (docId.isNullOrEmpty()) return
+
+        coroutineScope.launch {
+            try {
+                medsRepository.updateUserMedication(med, docId)
+                success.value = true
+            } catch (e: Exception) {
+                Log.e("TAG", "update: $e")
+            }
         }
     }
 

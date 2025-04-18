@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,9 +18,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Search
@@ -37,20 +36,18 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.daniela.pillbox.data.models.DBMedication
+import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.ui.components.FullScreenLoader
 import com.daniela.pillbox.utils.capitalized
 import com.daniela.pillbox.viewmodels.StorageViewModel
@@ -72,7 +69,7 @@ class StorageScreen : BaseScreen() {
                 .fillMaxSize()
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Custom Top Bar
+                // Top Bar
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -80,16 +77,15 @@ class StorageScreen : BaseScreen() {
                 ) {
                     IconButton(onClick = { navigator.pop() }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.Rounded.ChevronLeft,
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
                         text = "Medication Storage",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -164,7 +160,7 @@ class StorageScreen : BaseScreen() {
 
     @Composable
     private fun MedicationList(
-        filteredMedications: List<DBMedication>,
+        filteredMedications: List<MedicationWithDocId>,
         navigator: Navigator,
         vm: StorageViewModel, // Add ViewModel parameter
     ) {
@@ -220,7 +216,7 @@ class StorageScreen : BaseScreen() {
  */
 @Composable
 private fun MedicationStorageItem(
-    medication: DBMedication,
+    medication: MedicationWithDocId,
     onClick: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,

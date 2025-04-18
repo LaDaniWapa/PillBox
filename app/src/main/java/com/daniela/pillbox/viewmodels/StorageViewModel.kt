@@ -1,28 +1,20 @@
 package com.daniela.pillbox.viewmodels
 
-import android.content.Context
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.core.model.ScreenModel
-import com.daniela.pillbox.data.models.DBMedication
+import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.data.repository.MedicationRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class StorageViewModel(
     private val authRepository: AuthRepository,
     private val medsRepository: MedicationRepository,
-    private val savedStateHandle: SavedStateHandle,
-    private val ctx: Context,
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -138,7 +130,7 @@ class StorageViewModel(
     /**
      * Returns the comparator for sorting the medication list.
      */
-    private fun getSortComparator(): Comparator<DBMedication> {
+    private fun getSortComparator(): Comparator<MedicationWithDocId> {
         return when (_uiState.value.sortOrder) {
             "Z-A" -> compareByDescending { it.name }
             "Most Stock" -> compareByDescending { it.stock ?: 0 }
@@ -164,8 +156,8 @@ class StorageViewModel(
     }
 
     data class StorageUiState(
-        val allMedications: List<DBMedication> = emptyList(), // Original unfiltered list
-        val filteredMedications: List<DBMedication> = emptyList(), // Filtered results
+        val allMedications: List<MedicationWithDocId> = emptyList(), // Original unfiltered list
+        val filteredMedications: List<MedicationWithDocId> = emptyList(), // Filtered results
         val searchQuery: String = "",
         val selectedFilter: String = "All",
         val sortOrder: String = "A-Z",

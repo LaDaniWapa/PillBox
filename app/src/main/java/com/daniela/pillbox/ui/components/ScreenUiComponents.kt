@@ -65,7 +65,7 @@ fun MedicationItem(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = medication.schedule.specificTimes?.get(0) ?: "09:00",
+                    text = "09:00",
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Bold
                     ),
@@ -75,7 +75,7 @@ fun MedicationItem(
 
             // Medication icon
             MedicationIcon(
-                iconName = medication.iconName,
+                iconName = "heart",
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 

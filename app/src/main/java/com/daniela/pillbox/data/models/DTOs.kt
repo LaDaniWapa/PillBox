@@ -4,37 +4,55 @@ import java.io.Serializable
 
 // Objects for transferring data
 
-data class Medication(
-    val id: String,  // Changed to String (UUID or document ID)
-    val userId: String,
-    val name: String,
-    val dosage: String,  // e.g. "500mg"
-    val dosageUnit: String,  // e.g. "mg", "ml", "tablet"
-    val type: String,  // e.g. "tablet", "capsule", "injection", "liquid"
-    val schedule: Schedule,
-    val instructions: String,
-    val iconName: String? = null,
-    val startDate: String? = null,  // ISO format "2023-12-31"
-    val endDate: String? = null,
-    val notes: String? = null,
-    val stock: Int? = null,  // remaining quantity
-    val color: String? = null,  // For pill identification
-    val shape: String? = null,  // For pill identification
-    // val refillInfo: RefillInfo?  // Pharmacy contacts, prescription info
-) : Serializable
+interface BaseMedication {
+    val userId: String
+    val name: String
+    val dosage: String
+    val dosageUnit: String
+    val type: String
+    val stock: Int?
+    val instructions: String?
+    val notes: String?
+    val color: String?
+}
 
-data class DBMedication(
+data class Medication(
+    override val userId: String,
+    override val name: String,
+    override val dosage: String,
+    override val dosageUnit: String,
+    override val type: String,
+    override val stock: Int? = null,
+    override val instructions: String? = null,
+    override val notes: String? = null,
+    override val color: String? = null,
+) : BaseMedication, Serializable
+
+fun Medication.withDocId(docId: String) = MedicationWithDocId(
+    docId = docId,
+    userId = this.userId,
+    name = this.name,
+    dosage = this.dosage,
+    dosageUnit = this.dosageUnit,
+    type = this.type,
+    stock = this.stock,
+    instructions = this.instructions,
+    notes = this.notes,
+    color = this.color
+)
+
+data class MedicationWithDocId(
     val docId: String? = null,
-    val userId: String,
-    val name: String,
-    val dosage: String,
-    val dosageUnit: String,
-    val type: String,
-    val stock: Int?,
-    val instructions: String?,
-    val notes: String?,
-    val color: String?,
-) : Serializable
+    override val userId: String,
+    override val name: String,
+    override val dosage: String,
+    override val dosageUnit: String,
+    override val type: String,
+    override val stock: Int? = null,
+    override val instructions: String? = null,
+    override val notes: String? = null,
+    override val color: String? = null,
+) : BaseMedication, Serializable
 
 data class Schedule(
     val timesPerDay: Int? = null,  // e.g. 2 (twice daily)

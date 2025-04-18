@@ -15,23 +15,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import com.daniela.pillbox.data.models.DBMedication
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,10 +32,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.daniela.pillbox.data.models.MedicationWithDocId
 
 class MedicationDetailsScreen(
-    private val medication: DBMedication
+    private val medication: MedicationWithDocId,
 ) : BaseScreen() {
     @Composable
     override fun Content() {
@@ -52,8 +48,8 @@ class MedicationDetailsScreen(
 
     @Composable
     private fun MedicationDetailsContent(
-        medication: DBMedication,
-        navigator: Navigator? = null
+        medication: MedicationWithDocId,
+        navigator: Navigator? = null,
     ) {
         val scrollState = rememberScrollState()
 
@@ -196,14 +192,14 @@ class MedicationDetailsScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedButton(
-                        onClick = { /* Edit */ },
+                        onClick = { navigator?.replace(AddMedicationScreen(medication)) },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Edit")
                     }
 
                     Button(
-                        onClick = { /* Refill */ },
+                        onClick = { /* Add schedule */ },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Add Schedule")

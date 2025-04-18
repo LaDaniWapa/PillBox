@@ -29,22 +29,23 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.daniela.pillbox.data.models.MedicationWithDocId
+import com.daniela.pillbox.libs.colorpicker.ColorPicker
+import com.daniela.pillbox.libs.colorpicker.ColorPickerType
 import com.daniela.pillbox.ui.components.DropDownMenu
 import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.MyButton
 import com.daniela.pillbox.viewmodels.AddMedicationViewModel
-import com.daniela.pillbox.libs.colorpicker.ColorPicker
-import com.daniela.pillbox.libs.colorpicker.ColorPickerType
 
 /**
  * Screen for adding a new medication.
  */
-class AddMedicationScreen : BaseScreen() {
+class AddMedicationScreen(private val medicationToEdit: MedicationWithDocId? = null) : BaseScreen() {
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     override fun Content() {
         val ssh = SavedStateHandle()
-        val vm = rememberVoyagerScreenModel<AddMedicationViewModel>(ssh)
+        val vm = rememberVoyagerScreenModel<AddMedicationViewModel>(ssh, medicationToEdit)
 
         val scrollState = rememberScrollState()
         val navigator = LocalNavigator.currentOrThrow
@@ -179,7 +180,7 @@ class AddMedicationScreen : BaseScreen() {
 
                 // Save Button
                 MyButton(
-                    onClick = { vm.onSubmit() },
+                    onClick = vm::onSubmit,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
