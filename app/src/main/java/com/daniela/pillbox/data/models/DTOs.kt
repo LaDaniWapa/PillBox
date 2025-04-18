@@ -14,6 +14,7 @@ interface BaseMedication {
     val instructions: String?
     val notes: String?
     val color: String?
+    val taken: Boolean
 }
 
 data class Medication(
@@ -26,6 +27,7 @@ data class Medication(
     override val instructions: String? = null,
     override val notes: String? = null,
     override val color: String? = null,
+    override val taken: Boolean = false,
 ) : BaseMedication, Serializable
 
 fun Medication.withDocId(docId: String) = MedicationWithDocId(
@@ -52,6 +54,7 @@ data class MedicationWithDocId(
     override val instructions: String? = null,
     override val notes: String? = null,
     override val color: String? = null,
+    override val taken: Boolean = false,
 ) : BaseMedication, Serializable
 
 data class Schedule(
