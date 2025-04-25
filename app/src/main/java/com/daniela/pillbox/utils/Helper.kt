@@ -4,6 +4,8 @@ import android.content.Context
 import com.daniela.pillbox.R
 import io.appwrite.exceptions.AppwriteException
 import java.io.IOException
+import java.time.DayOfWeek
+import java.time.format.TextStyle
 import java.util.Locale
 
 /**
@@ -27,6 +29,35 @@ class Helper(private val ctx: Context) {
 
             is IOException -> ctx.getString(R.string.error_network)
             else -> ctx.getString(R.string.error_unknown)
+        }
+    }
+}
+
+fun getLocalizedWeekDayName(
+    dayIndex: Int,
+    locale: Locale = Locale.getDefault(),
+    short: Boolean = false,
+): String {
+    val dayOfWeek = DayOfWeek.of(((dayIndex + 1) % 7).let { if (it == 0) 7 else it })
+    return dayOfWeek.getDisplayName(if (short) TextStyle.SHORT else TextStyle.FULL, locale)
+}
+
+fun formatDayList(
+    dayIndices: List<Int>,
+    locale: Locale = Locale.getDefault(),
+    finalSeparator: String = "and",
+): String {
+    if (dayIndices.isEmpty()) return ""
+    if (dayIndices.size == 7) return "Everyday"
+
+    val dayNames =
+        dayIndices.sorted().map { getLocalizedWeekDayName(it, locale = locale, short = true) }
+
+    return when (dayNames.size) {
+        1 -> dayNames.first()
+        else -> {
+            val allButLast = dayNames.dropLast(1).joinToString(", ")
+            "$allButLast $finalSeparator ${dayNames.last()}"
         }
     }
 }

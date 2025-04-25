@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.data.repository.MedicationRepository
 import com.daniela.pillbox.viewmodels.AddMedicationViewModel
+import com.daniela.pillbox.viewmodels.MedicationDetailsViewModel
 import com.daniela.pillbox.viewmodels.StorageViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -31,6 +32,13 @@ val storageModule = module {
             savedStateHandle = savedStateHandle,
             medicationToEdit = medicationToEdit,
             ctx = ctx
+        )
+    }
+
+    factory { (ctx: Context, med: MedicationWithDocId) ->
+        MedicationDetailsViewModel(
+            med = med,
+            medsRepository = get()
         )
     }
 }

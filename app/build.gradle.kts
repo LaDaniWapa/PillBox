@@ -25,6 +25,7 @@ android {
         buildConfigField("String", "PROJECT_ID", "\"${secrets.getProperty("APPWRITE_PROJECT_ID", "")}\"")
         buildConfigField("String", "DATABASE_ID", "\"${secrets.getProperty("APPWRITE_DATABASE_ID", "")}\"")
         buildConfigField("String", "MEDICATIONS_ID", "\"${secrets.getProperty("APPWRITE_MEDICATIONS_ID", "")}\"")
+        buildConfigField("String", "SCHEDULES_ID", "\"${secrets.getProperty("APPWRITE_SCHEDULES_ID", "")}\"")
 
         applicationId = "com.daniela.pillbox"
         minSdk = 29

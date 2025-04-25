@@ -155,6 +155,9 @@ class StorageViewModel(
         coroutineScope.cancel()
     }
 
+    /**
+     * Represents the UI state for the Storage screen.
+     */
     data class StorageUiState(
         val allMedications: List<MedicationWithDocId> = emptyList(), // Original unfiltered list
         val filteredMedications: List<MedicationWithDocId> = emptyList(), // Filtered results

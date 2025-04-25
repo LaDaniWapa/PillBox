@@ -6,6 +6,8 @@ import com.daniela.pillbox.Appwrite
 import com.daniela.pillbox.BuildConfig
 import com.daniela.pillbox.data.models.Medication
 import com.daniela.pillbox.data.models.MedicationWithDocId
+import com.daniela.pillbox.data.models.Schedule
+import com.daniela.pillbox.data.models.ScheduleWithDocId
 import com.daniela.pillbox.data.models.withDocId
 import io.appwrite.ID
 import io.appwrite.Query
@@ -34,11 +36,12 @@ class MedicationRepository(val ctx: Context) {
             nestedType = Medication::class.java
         ).documents
 
-        Log.i("TAG", "getUserMedications: $documents")
-
         _medications.value = documents.map { it.data.withDocId(it.id) }
     }
 
+    /**
+     * Deletes a medication from the database and update the local medication list
+     */
     suspend fun deleteUserMedication(docId: String) {
         val db = Appwrite.getDatabases(ctx)
 
@@ -77,6 +80,9 @@ class MedicationRepository(val ctx: Context) {
         }
     }
 
+    /**
+     * Updates a medication in the database and update the local medication list
+     */
     suspend fun updateUserMedication(medication: Medication, docId: String) {
         val db = Appwrite.getDatabases(ctx)
 
@@ -101,5 +107,42 @@ class MedicationRepository(val ctx: Context) {
             Log.e("TAG", "updateUserMedication: $e")
         }
 
+    }
+
+    /**
+     * Adds a schedule to the database
+     */
+    suspend fun addMedicationSchedule(schedule: Schedule): ScheduleWithDocId {
+        return ScheduleWithDocId()
+    }
+
+    /**
+     * Deletes a schedule from the database
+     */
+    suspend fun deleteMedicationSchedule(docId: String) {}
+
+    /**
+     * Updates a schedule in the database
+     */
+    suspend fun updateMedicationSchedule(schedule: Schedule, docId: String) {}
+
+    /**
+     * Gets all schedules for a specific medication
+     */
+    suspend fun getMedicationSchedules(medicationId: String): List<ScheduleWithDocId> {
+        val db = Appwrite.getDatabases(ctx)
+        val documents = db.listDocuments(
+            databaseId = BuildConfig.DATABASE_ID,
+            collectionId = BuildConfig.SCHEDULES_ID,
+            queries = listOf(
+                Query.equal("medicationId", medicationId)
+            ),
+            nestedType = Schedule::class.java
+        ).documents
+
+        Log.i("TAG", "getMedicationSchedules: $documents")
+
+        return documents.map { it.data.withDocId(it.id) }
+        //return listOf()
     }
 }

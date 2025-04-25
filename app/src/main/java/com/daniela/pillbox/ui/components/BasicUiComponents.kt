@@ -2,6 +2,8 @@ package com.daniela.pillbox.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,10 +13,12 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -65,7 +69,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.daniela.pillbox.utils.Helper
+import com.daniela.pillbox.utils.formatDayList
 import java.util.Locale
 
 // Contains custom components for the app
@@ -85,7 +92,7 @@ fun LabelTextField(
     readOnly: Boolean = false,
     trailingIcon: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
-    maxLines: Int = 1
+    maxLines: Int = 1,
 ) {
     Column(modifier = modifier) {
         //External label
@@ -270,7 +277,7 @@ fun DropDownMenu(
     onSelected: (Int) -> Unit = {},
     initialState: Boolean = false,
     label: String = "Choose an option",
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     var expanded by remember { mutableStateOf(initialState) }
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -286,7 +293,7 @@ fun DropDownMenu(
         expanded = expanded,
         onExpandedChange = { if (enabled) expanded = !expanded },
 
-    ) {
+        ) {
         LabelTextField(
             value = list[selectedIndex],
             onValueChange = {},
@@ -394,7 +401,6 @@ fun IntInputField(
         )
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomTimePickerDialog(
@@ -469,7 +475,7 @@ fun TimePickerButton(
 
     Surface(
         modifier = modifier,
-        shape = CardDefaults.shape,
+        shape = MaterialTheme.shapes.medium,
         tonalElevation = 32.dp,
         onClick = {
             visibleState.value = true
@@ -509,4 +515,48 @@ fun FullScreenLoader() {
     ) {
         CircularProgressIndicator()
     }
+}
+
+@Composable
+fun DayIndicator2(days: List<Int>) {
+    val dayLetters = listOf("S", "M", "T", "W", "T", "F", "S")
+
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        dayLetters.forEachIndexed { index, letter ->
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(
+                        color = if (days.contains(index))
+                            MaterialTheme.colorScheme.primary
+                        else Color.Transparent,
+                        shape = CircleShape
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = letter,
+                    color = if (days.contains(index))
+                        MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.onSurface,
+                    fontSize = 15.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DayIndicator(days: List<Int>) {
+    Text(
+        text = formatDayList(days),
+        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
 }
