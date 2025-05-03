@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.data.models.MedicationWithDocId
+import com.daniela.pillbox.data.models.ScheduleWithDocId
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.data.repository.MedicationRepository
 import kotlinx.coroutines.CoroutineScope
@@ -24,14 +25,7 @@ class StorageViewModel(
 
     // Available filters
     val filters = listOf(
-        "All",
-        "Low Stock",
-        "Tablets",
-        "Liquids",
-        "Capsules",
-        "Injections",
-        "Creams",
-        "Others"
+        "All", "Low Stock", "Tablets", "Liquids", "Capsules", "Injections", "Creams", "Others"
     )
 
     init {
@@ -76,25 +70,45 @@ class StorageViewModel(
             try {
                 authRepository.user.value?.id?.let { userId ->
                     medsRepository.getUserMedications(userId)
+                    _uiState.value = _uiState.value.copy(isLoading = false)
                 } ?: run {
                     _uiState.value = _uiState.value.copy(
-                        error = "User not authenticated",
-                        isLoading = false
+                        error = "User not authenticated", isLoading = false
                     )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    error = "Failed to load medications: ${e.localizedMessage}",
-                    isLoading = false
+                    error = "Failed to load medications: ${e.localizedMessage}", isLoading = false
                 )
             }
         }
     }
 
+    /**
+     * Deletes a medication from the repository.
+     */
     fun deleteMedication(medDocId: String) {
-        coroutineScope.launch {
-            medsRepository.deleteUserMedication(medDocId)
+        _uiState.value = _uiState.value.copy(
+            showDeleteDialog = true, selectedMedicationId = medDocId
+        )
+    }
+
+    /**
+     * Called when the user confirms the deletion of a medication.
+     */
+    fun confirmDeleteMedication() {
+        _uiState.value.selectedMedicationId?.let { medDocId ->
+            coroutineScope.launch {
+                medsRepository.deleteUserMedication(medDocId)
+            }
         }
+    }
+
+    /**
+     * Called when the user cancels the deletion of a medication.
+     */
+    fun dismissDialog() {
+        _uiState.value = _uiState.value.copy(showDeleteDialog = false, selectedMedicationId = null)
     }
 
     /**
@@ -123,7 +137,6 @@ class StorageViewModel(
                     }
                 }
                 .sortedWith(getSortComparator())
-
         )
     }
 
@@ -141,7 +154,6 @@ class StorageViewModel(
 
     /**
      * Refreshes the medication list.
-     * TODO: add pull to refresh or button
      */
     fun refresh() {
         loadMedications()
@@ -166,5 +178,7 @@ class StorageViewModel(
         val sortOrder: String = "A-Z",
         val isLoading: Boolean = false,
         val error: String? = null,
+        val showDeleteDialog: Boolean = false,
+        val selectedMedicationId: String? = null,
     )
 }

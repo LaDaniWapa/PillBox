@@ -51,6 +51,8 @@ import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.data.models.Schedule
 import com.daniela.pillbox.data.models.ScheduleWithDocId
 import com.daniela.pillbox.ui.components.DayIndicator
+import com.daniela.pillbox.ui.components.DeleteConfirmationDialog
+import com.daniela.pillbox.ui.components.FullScreenLoader
 import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.viewmodels.MedicationDetailsViewModel
 
@@ -60,15 +62,16 @@ class MedicationDetailsScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        MedicationDetailsContent(medication, navigator)
-    }
-
-    @Composable
-    private fun MedicationDetailsContent(
-        medication: MedicationWithDocId,
-        navigator: Navigator? = null,
-    ) {
         val vm = rememberVoyagerScreenModel<MedicationDetailsViewModel>(medication)
+        val state by vm.uiState
+
+        if (state.showDeleteDialog)
+            DeleteConfirmationDialog(
+                description = "Are you sure you want to delete this schedule?",
+                title = "Delete Schedule?",
+                onDismiss = vm::dismissDialog,
+                onConfirm = vm::confirmDeleteSchedule
+            )
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -76,25 +79,7 @@ class MedicationDetailsScreen(
         ) {
             // Top Bar
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { navigator?.pop() }) {
-                        Icon(
-                            imageVector = Icons.Rounded.ChevronLeft,
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = "Medication Details",
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                TopBar(navigator)
             }
 
             // Content
@@ -104,109 +89,10 @@ class MedicationDetailsScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // Header with name and type
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Color indicator
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(
-                                    color = medication.color?.let { Color(it.toColorInt()) }
-                                        ?: MaterialTheme.colorScheme.primaryContainer,
-                                    shape = CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Medication,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Column {
-                            Text(
-                                text = medication.name,
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = medication.type.replaceFirstChar { it.uppercase() },
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
+                    Header()
 
                     // Details
-                    Card(
-                        shape = MaterialTheme.shapes.medium,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            // Dosage Information
-                            DetailRow(
-                                label = "Dosage",
-                                value = "${medication.dosage} ${medication.dosageUnit}"
-                            )
-
-                            // Stock Information with warning for low stock
-                            DetailRow(
-                                label = "Current Stock",
-                                value = when {
-                                    medication.stock == null -> "Not tracked"
-                                    medication.stock <= 0 -> "Out of stock"
-                                    else -> "${medication.stock} remaining"
-                                },
-                                isWarning = medication.stock?.let { it < 5 } == true
-                            )
-
-                            // Medication Type
-                            DetailRow(
-                                label = "Medication Type",
-                                value = medication.type.replaceFirstChar { it.uppercase() }
-                            )
-
-                            // Instructions (if available)
-                            medication.instructions?.let { instructions ->
-                                DetailRow(
-                                    label = "Instructions",
-                                    value = instructions,
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
-                            }
-
-                            // Notes (if available)
-                            medication.notes?.let { notes ->
-                                DetailRow(
-                                    label = "Additional Notes",
-                                    value = notes,
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
-                            }
-
-                            // Document ID (for debugging/development)
-                            if (medication.docId != null) {
-                                DetailRow(
-                                    label = "Document ID",
-                                    value = medication.docId,
-                                    textStyle = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(top = 8.dp)
-                                )
-                            }
-                        }
-                    }
+                    DetailsCard()
 
                     // Action Buttons
                     Row(
@@ -214,14 +100,14 @@ class MedicationDetailsScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         OutlinedButton(
-                            onClick = { navigator?.replace(AddMedicationScreen(medication)) },
+                            onClick = { navigator.replace(AddMedicationScreen(medication)) },
                             modifier = Modifier.weight(1f)
                         ) {
                             Text("Edit")
                         }
 
                         Button(
-                            onClick = { vm.onShowAddDialogChange(true) },
+                            onClick = { /*vm.onShowAddDialogChange(true)*/ },
                             modifier = Modifier.weight(1f)
                         ) {
                             Text("Add Schedule")
@@ -231,17 +117,153 @@ class MedicationDetailsScreen(
             }
 
             // Schedules
-            items(vm.schedules) { schedule ->
-                Log.i("TAG", "MedicationDetailsContent: $schedule")
-                ScheduleItem(
-                    schedule = schedule,
-                    onEdit = { vm.onEditingScheduleChange(schedule) },
-                    onDelete = {
-                        schedule.docId?.let {
-                            vm.deleteSchedule(it)
+            if (state.isLoading)
+                item {
+                    FullScreenLoader()
+                }
+            else
+                items(state.schedules) { schedule ->
+                    ScheduleItem(
+                        schedule = schedule,
+                        onEdit = { /*vm.onEditingScheduleChange(schedule)*/ },
+                        onDelete = {
+                            schedule.docId?.let {
+                                vm.deleteSchedule(it)
+                            }
                         }
-                    }
+                    )
+                }
+        }
+    }
+
+    @Composable
+    private fun Header() {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Color indicator
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        color = medication.color?.let { Color(it.toColorInt()) }
+                            ?: MaterialTheme.colorScheme.primaryContainer,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Medication,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(24.dp)
                 )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column {
+                Text(
+                    text = medication.name,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = medication.type.replaceFirstChar { it.uppercase() },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun TopBar(navigator: Navigator) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { navigator.pop() }) {
+                Icon(
+                    imageVector = Icons.Rounded.ChevronLeft,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Medication Details",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+
+    @Composable
+    private fun DetailsCard() {
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Dosage Information
+                DetailRow(
+                    label = "Dosage",
+                    value = "${medication.dosage} ${medication.dosageUnit}"
+                )
+
+                // Stock Information with warning for low stock
+                DetailRow(
+                    label = "Current Stock",
+                    value = when {
+                        medication.stock == null -> "Not tracked"
+                        medication.stock <= 0 -> "Out of stock"
+                        else -> "${medication.stock} remaining"
+                    },
+                    isWarning = medication.stock?.let { it < 5 } == true
+                )
+
+                // Medication Type
+                DetailRow(
+                    label = "Medication Type",
+                    value = medication.type.replaceFirstChar { it.uppercase() }
+                )
+
+                // Instructions (if available)
+                medication.instructions?.let { instructions ->
+                    DetailRow(
+                        label = "Instructions",
+                        value = instructions,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                // Notes (if available)
+                medication.notes?.let { notes ->
+                    DetailRow(
+                        label = "Additional Notes",
+                        value = notes,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                // Document ID (for debugging/development)
+                if (medication.docId != null) {
+                    DetailRow(
+                        label = "Document ID",
+                        value = medication.docId,
+                        textStyle = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
         }
     }
@@ -289,7 +311,7 @@ class MedicationDetailsScreen(
             )
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Days row
+                // Days & buttons row
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (schedule.asNeeded)
                         Text(

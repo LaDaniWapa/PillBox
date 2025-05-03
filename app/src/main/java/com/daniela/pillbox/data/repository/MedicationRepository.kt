@@ -119,7 +119,23 @@ class MedicationRepository(val ctx: Context) {
     /**
      * Deletes a schedule from the database
      */
-    suspend fun deleteMedicationSchedule(docId: String) {}
+    suspend fun deleteMedicationSchedule(docId: String): Boolean {
+        var res: Any? = null
+
+        val db = Appwrite.getDatabases(ctx)
+        try {
+            res = db.deleteDocument(
+                databaseId = BuildConfig.DATABASE_ID,
+                collectionId = BuildConfig.SCHEDULES_ID,
+                documentId = docId,
+            )
+
+        } catch (e: Exception) {
+            Log.e("TAG", "deleteUserMedication: $e")
+        }
+
+        return res == true
+    }
 
     /**
      * Updates a schedule in the database
@@ -140,9 +156,6 @@ class MedicationRepository(val ctx: Context) {
             nestedType = Schedule::class.java
         ).documents
 
-        Log.i("TAG", "getMedicationSchedules: $documents")
-
         return documents.map { it.data.withDocId(it.id) }
-        //return listOf()
     }
 }

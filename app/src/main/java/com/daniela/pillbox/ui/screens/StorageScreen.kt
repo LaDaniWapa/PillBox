@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -48,6 +49,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.data.models.MedicationWithDocId
+import com.daniela.pillbox.ui.components.DeleteConfirmationDialog
 import com.daniela.pillbox.ui.components.FullScreenLoader
 import com.daniela.pillbox.utils.capitalized
 import com.daniela.pillbox.viewmodels.StorageViewModel
@@ -64,10 +66,19 @@ class StorageScreen : BaseScreen() {
         val vm = rememberVoyagerScreenModel<StorageViewModel>(ssh)
         val state by vm.uiState
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
+        PullToRefreshBox(
+            modifier = Modifier.fillMaxSize(),
+            isRefreshing = state.isLoading,
+            onRefresh = vm::refresh
         ) {
+            if (state.showDeleteDialog)
+                DeleteConfirmationDialog(
+                    description = "Are you sure you want to delete this medication?",
+                    title = "Delete medication?",
+                    onDismiss = vm::dismissDialog,
+                    onConfirm = vm::confirmDeleteMedication
+                )
+
             Column(modifier = Modifier.fillMaxSize()) {
                 // Top Bar
                 Row(
@@ -281,7 +292,9 @@ private fun MedicationStorageItem(
             // Bottom Row: Notes + Stock
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(top = 5.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp)
             ) {
                 // Notes (if exists)
                 medication.notes?.let { notes ->
