@@ -113,6 +113,22 @@ class MedicationRepository(val ctx: Context) {
      * Adds a schedule to the database
      */
     suspend fun addMedicationSchedule(schedule: Schedule): ScheduleWithDocId {
+        var res: Any? = null
+
+        val db = Appwrite.getDatabases(ctx)
+        try {
+            res = db.createDocument(
+                databaseId = BuildConfig.DATABASE_ID,
+                collectionId = BuildConfig.SCHEDULES_ID,
+                documentId = ID.unique(),
+                data = schedule,
+                nestedType = Schedule::class.java
+            )
+
+        } catch (e: Exception) {
+            Log.e("TAG", "deleteUserMedication: $e")
+        }
+
         return ScheduleWithDocId()
     }
 
@@ -140,7 +156,23 @@ class MedicationRepository(val ctx: Context) {
     /**
      * Updates a schedule in the database
      */
-    suspend fun updateMedicationSchedule(schedule: Schedule, docId: String) {}
+    suspend fun updateMedicationSchedule(schedule: Schedule, docId: String) {
+        var res: Any? = null
+
+        val db = Appwrite.getDatabases(ctx)
+        try {
+            res = db.updateDocument(
+                databaseId = BuildConfig.DATABASE_ID,
+                collectionId = BuildConfig.SCHEDULES_ID,
+                documentId = docId,
+                data = schedule,
+                nestedType = Schedule::class.java
+            )
+            Log.i("TAG", "updateMedicationSchedule: $res")
+        } catch (e: Exception) {
+            Log.e("TAG", "updateMedicationSchedule: $e")
+        }
+    }
 
     /**
      * Gets all schedules for a specific medication

@@ -1,7 +1,6 @@
 package com.daniela.pillbox.viewmodels
 
-import android.util.Log
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.data.models.MedicationWithDocId
@@ -13,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.State
 
 class MedicationDetailsViewModel(
     private val med: MedicationWithDocId,

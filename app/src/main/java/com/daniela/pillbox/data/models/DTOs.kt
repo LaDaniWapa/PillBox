@@ -4,6 +4,9 @@ import java.io.Serializable
 
 // Objects for transferring data
 
+/**
+ * Interface for medication objects.
+ */
 interface BaseMedication {
     val userId: String
     val name: String
@@ -16,6 +19,9 @@ interface BaseMedication {
     val color: String?
 }
 
+/**
+ * Medication object.
+ */
 data class Medication(
     override val userId: String,
     override val name: String,
@@ -28,6 +34,9 @@ data class Medication(
     override val color: String? = null,
 ) : BaseMedication, Serializable
 
+/**
+ * Adds a document ID to a Medication object.
+ */
 fun Medication.withDocId(docId: String) = MedicationWithDocId(
     docId = docId,
     userId = this.userId,
@@ -41,6 +50,9 @@ fun Medication.withDocId(docId: String) = MedicationWithDocId(
     color = this.color
 )
 
+/**
+ * Medication object with a document ID.
+ */
 data class MedicationWithDocId(
     val docId: String? = null,
     override val userId: String,
@@ -54,13 +66,19 @@ data class MedicationWithDocId(
     override val color: String? = null,
 ) : BaseMedication, Serializable
 
+/**
+ * Interface for schedule objects.
+ */
 interface BaseSchedule {
-    val weekDays: List<Int>?    // [0, 1, 2, ... 6]
-    val times: List<String>?   // ["08:00", "12:00", ...]
-    val amounts: List<Int>?     // [1, 2, 3, ...]
-    val asNeeded: Boolean       // true if the schedule is for as needed medication
+    val weekDays: List<Int>?
+    val times: List<String>?
+    val amounts: List<Int>?
+    val asNeeded: Boolean
 }
 
+/**
+ * Schedule object.
+ */
 data class Schedule(
     override val weekDays: List<Int>? = null,
     override val times: List<String>? = null,
@@ -68,6 +86,9 @@ data class Schedule(
     override val asNeeded: Boolean = false,
 ) : BaseSchedule, Serializable
 
+/**
+ * Schedule object with a document ID.
+ */
 data class ScheduleWithDocId(
     val docId: String? = null,
     override val weekDays: List<Int>? = null,
@@ -76,6 +97,9 @@ data class ScheduleWithDocId(
     override val asNeeded: Boolean = false,
 ) : BaseSchedule, Serializable
 
+/**
+ * Adds a document ID to a Schedule object.
+ */
 fun Schedule.withDocId(docId: String) = ScheduleWithDocId(
     docId = docId,
     weekDays = this.weekDays,

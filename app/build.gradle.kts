@@ -1,9 +1,31 @@
 import java.util.Properties
+import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.dokka") version "1.9.10"
+}
+
+tasks.named<DokkaTask>("dokkaHtml").configure {
+    outputDirectory.set(file("docs/dokka"))
+    moduleName.set("PillBox")
+
+    dokkaSourceSets.named("main") {
+        perPackageOption {
+            matchingRegex.set(".*libs.*")
+            suppress.set(true)
+        }
+        perPackageOption {
+            matchingRegex.set("com\\.daniela\\.pillbox\\.ui\\.theme")
+            suppress.set(true)
+        }
+        perPackageOption {
+            matchingRegex.set("com\\.daniela\\.pillbox\\.activity")
+            suppress.set(true)
+        }
+    }
 }
 
 // Top of your app/build.gradle.kts
@@ -21,11 +43,31 @@ android {
 
     defaultConfig {
         // Required for BuildConfig access
-        buildConfigField("String", "ENDPOINT", "\"${secrets.getProperty("APPWRITE_ENDPOINT", "")}\"")
-        buildConfigField("String", "PROJECT_ID", "\"${secrets.getProperty("APPWRITE_PROJECT_ID", "")}\"")
-        buildConfigField("String", "DATABASE_ID", "\"${secrets.getProperty("APPWRITE_DATABASE_ID", "")}\"")
-        buildConfigField("String", "MEDICATIONS_ID", "\"${secrets.getProperty("APPWRITE_MEDICATIONS_ID", "")}\"")
-        buildConfigField("String", "SCHEDULES_ID", "\"${secrets.getProperty("APPWRITE_SCHEDULES_ID", "")}\"")
+        buildConfigField(
+            "String",
+            "ENDPOINT",
+            "\"${secrets.getProperty("APPWRITE_ENDPOINT", "")}\""
+        )
+        buildConfigField(
+            "String",
+            "PROJECT_ID",
+            "\"${secrets.getProperty("APPWRITE_PROJECT_ID", "")}\""
+        )
+        buildConfigField(
+            "String",
+            "DATABASE_ID",
+            "\"${secrets.getProperty("APPWRITE_DATABASE_ID", "")}\""
+        )
+        buildConfigField(
+            "String",
+            "MEDICATIONS_ID",
+            "\"${secrets.getProperty("APPWRITE_MEDICATIONS_ID", "")}\""
+        )
+        buildConfigField(
+            "String",
+            "SCHEDULES_ID",
+            "\"${secrets.getProperty("APPWRITE_SCHEDULES_ID", "")}\""
+        )
 
         applicationId = "com.daniela.pillbox"
         minSdk = 29

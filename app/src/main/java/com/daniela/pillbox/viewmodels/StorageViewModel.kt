@@ -4,7 +4,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.data.models.MedicationWithDocId
-import com.daniela.pillbox.data.models.ScheduleWithDocId
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.data.repository.MedicationRepository
 import kotlinx.coroutines.CoroutineScope
