@@ -407,7 +407,7 @@ fun CustomTimePickerDialog(
     visibleState: MutableState<Boolean>,
     timePickerState: TimePickerState,
     onTimeSelected: (Int, Int) -> Unit,
-    label: String = "Select Time",
+    label: String? = "Select Time",
 ) {
     if (visibleState.value) {
         Dialog(
@@ -428,11 +428,12 @@ fun CustomTimePickerDialog(
                             modifier = Modifier.padding(24.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Text(
-                                label,
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
+                            if (!label.isNullOrEmpty())
+                                Text(
+                                    label,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
 
                             TimePicker(
                                 state = timePickerState,
@@ -467,35 +468,43 @@ fun CustomTimePickerDialog(
 @Preview(showBackground = true)
 fun TimePickerButton(
     modifier: Modifier = Modifier,
-    label: String = "Select Time",
+    label: String? = "Select Time",
     onTimeSelected: (Int, Int) -> Unit = { _, _ -> },
 ) {
     val visibleState = remember { mutableStateOf(false) }
     val timePickerState = rememberTimePickerState()
 
-    Surface(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        tonalElevation = 32.dp,
-        onClick = {
-            visibleState.value = true
-        },
-
-        ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = String.format(
-                    Locale.getDefault(),
-                    "%02d:%02d",
-                    timePickerState.hour,
-                    timePickerState.minute
-                ),
-                modifier = Modifier
-                    .padding(8.dp),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+    Column {
+        Text(
+            text = "Pick Time",
+            textAlign = TextAlign.Start,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Card(
+            modifier = modifier,
+            shape = MaterialTheme.shapes.medium,
+            onClick = {
+                visibleState.value = true
+            },
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
             )
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = String.format(
+                        Locale.getDefault(),
+                        "%02d:%02d",
+                        timePickerState.hour,
+                        timePickerState.minute
+                    ),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 

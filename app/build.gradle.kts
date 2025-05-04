@@ -9,7 +9,7 @@ plugins {
 }
 
 tasks.named<DokkaTask>("dokkaHtml").configure {
-    outputDirectory.set(file("docs/dokka"))
+    outputDirectory.set(file("docs"))
     moduleName.set("PillBox")
 
     dokkaSourceSets.named("main") {

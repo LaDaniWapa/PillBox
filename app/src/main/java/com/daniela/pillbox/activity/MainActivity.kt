@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import cafe.adriel.voyager.navigator.Navigator
+import com.daniela.pillbox.ui.screens.AddScheduleScreen
 import com.daniela.pillbox.ui.screens.HomeScreen
 import com.daniela.pillbox.ui.theme.AppTheme
 
@@ -55,7 +56,7 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .padding(horizontal = 16.dp)
                     ) {
-                        Navigator(HomeScreen())
+                        Navigator(AddScheduleScreen("68179e43002e99922f9b"))
                     }
                 }
             }

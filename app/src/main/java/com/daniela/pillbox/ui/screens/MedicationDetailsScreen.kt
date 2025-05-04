@@ -98,7 +98,7 @@ class MedicationDetailsScreen(
                         }
 
                         Button(
-                            onClick = { /*vm.onShowAddDialogChange(true)*/ },
+                            onClick = { navigator.push(AddScheduleScreen(medication.docId!!)) },
                             modifier = Modifier.weight(1f)
                         ) {
                             Text("Add Schedule")
@@ -124,6 +124,29 @@ class MedicationDetailsScreen(
                         }
                     )
                 }
+        }
+    }
+
+    @Composable
+    private fun TopBar(navigator: Navigator) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { navigator.pop() }) {
+                Icon(
+                    imageVector = Icons.Rounded.ChevronLeft,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Medication Details",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 
@@ -166,29 +189,6 @@ class MedicationDetailsScreen(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
-        }
-    }
-
-    @Composable
-    private fun TopBar(navigator: Navigator) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navigator.pop() }) {
-                Icon(
-                    imageVector = Icons.Rounded.ChevronLeft,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = "Medication Details",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.weight(1f)
-            )
         }
     }
 
@@ -365,4 +365,5 @@ class MedicationDetailsScreen(
             }
         }
     }
+
 }

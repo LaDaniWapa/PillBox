@@ -4,7 +4,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.data.models.MedicationWithDocId
-import com.daniela.pillbox.data.models.Schedule
 import com.daniela.pillbox.data.models.ScheduleWithDocId
 import com.daniela.pillbox.data.repository.MedicationRepository
 import kotlinx.coroutines.CoroutineScope
@@ -55,67 +54,7 @@ class MedicationDetailsViewModel(
         }
     }
 
-    /**
-     * Called when the user confirms the deletion of a schedule.
-     */
-    fun addSchedule(schedule: Schedule) {
-        updateUiState { copy(isLoading = true) }
 
-        coroutineScope.launch {
-            try {
-                val newSchedule = medsRepository.addMedicationSchedule(schedule)
-                updateUiState {
-                    copy(
-                        schedules = schedules + newSchedule,
-                        isLoading = false,
-                        showAddDialog = false
-                    )
-                }
-            } catch (e: Exception) {
-                updateUiState {
-                    copy(
-                        isLoading = false,
-                        error = e.message ?: "Failed to add schedule"
-                    )
-                }
-            }
-        }
-    }
-
-    /**
-     * Called when the user confirms the deletion of a schedule.
-     */
-    fun updateSchedule(schedule: Schedule, docId: String) {
-        updateUiState { copy(isLoading = true) }
-
-        coroutineScope.launch {
-            try {
-                medsRepository.updateMedicationSchedule(schedule, docId)
-                val updatedSchedules = _uiState.value.schedules.map {
-                    if (it.docId == docId) it.copy(
-                        weekDays = schedule.weekDays,
-                        times = schedule.times,
-                        amounts = schedule.amounts,
-                        asNeeded = schedule.asNeeded
-                    ) else it
-                }
-                updateUiState {
-                    copy(
-                        schedules = updatedSchedules,
-                        isLoading = false,
-                        editingSchedule = null
-                    )
-                }
-            } catch (e: Exception) {
-                updateUiState {
-                    copy(
-                        isLoading = false,
-                        error = e.message ?: "Failed to update schedule"
-                    )
-                }
-            }
-        }
-    }
 
     /**
      * Called when the user confirms the deletion of a schedule.
@@ -190,7 +129,7 @@ class MedicationDetailsViewModel(
      */
     data class MedicationDetailsUiState(
         val schedules: List<ScheduleWithDocId> = emptyList(),
-        val showAddDialog: Boolean = false,
+        val showAddDialog: Boolean = true,
         val showDeleteDialog: Boolean = false,
         val editingSchedule: ScheduleWithDocId? = null,
         val isLoading: Boolean = false,
