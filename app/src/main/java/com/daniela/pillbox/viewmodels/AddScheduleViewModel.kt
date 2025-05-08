@@ -1,5 +1,6 @@
 package com.daniela.pillbox.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
@@ -20,7 +21,7 @@ class AddScheduleViewModel(
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    private val _uiState = mutableStateOf(AddScheduleUiState())
+    private val _uiState = mutableStateOf(AddScheduleUiState(medicationId))
     val uiState: State<AddScheduleUiState> = _uiState
 
     private fun updateUiState(update: AddScheduleUiState.() -> AddScheduleUiState) {
@@ -32,7 +33,7 @@ class AddScheduleViewModel(
             updateUiState {
                 copy(
                     schedules = if (schedules.isEmpty())
-                        listOf(ScheduleWithDocId())
+                        listOf(ScheduleWithDocId(medicationId = medicationId))
                     else
                         schedules,
                     asNeeded = schedules.any { it.asNeeded }
@@ -47,19 +48,24 @@ class AddScheduleViewModel(
                 asNeeded = !_uiState.value.asNeeded,
                 schedules = if (!_uiState.value.asNeeded) {
                     // When enabling "as needed", clear other schedules
-                    listOf(ScheduleWithDocId(asNeeded = true, medicationId = medicationId))
+                    listOf(ScheduleWithDocId(
+                        docId = _uiState.value.schedules.firstOrNull()?.docId,
+                        asNeeded = true,
+                        medicationId = medicationId
+                    ))
                 } else {
                     // When disabling "as needed", add a default schedule
-                    listOf(ScheduleWithDocId(medicationId = medicationId))
+                    listOf(ScheduleWithDocId(
+                        docId = _uiState.value.schedules.firstOrNull()?.docId,
+                        medicationId = medicationId
+                    ))
                 }
             )
         }
     }
 
     fun updateSchedule(index: Int, schedule: ScheduleWithDocId) {
-        /*coroutineScope.launch {
-            medsRepository.updateMedicationSchedule(schedule.toSchedule(), schedule.docId!!)
-        }*/
+        Log.i("TAG", "updateSchedule: $schedule")
 
         val updatedSchedules = _uiState.value.schedules.toMutableList().apply {
             set(index, schedule)
@@ -68,8 +74,16 @@ class AddScheduleViewModel(
     }
 
     fun removeSchedule(index: Int) {
+        val scheduleToRemove = _uiState.value.schedules[index]
         val updatedSchedules = _uiState.value.schedules.toMutableList().apply {
             removeAt(index)
+        }
+
+        // Delete from DB if it was an existing schedule
+        scheduleToRemove.docId?.let { docId ->
+            coroutineScope.launch {
+                medsRepository.deleteMedicationSchedule(docId)
+            }
         }
 
         updateUiState {
@@ -89,23 +103,47 @@ class AddScheduleViewModel(
     }
 
     fun saveSchedule() {
-        val schedulesToSave = if (_uiState.value.asNeeded) {
-            listOf(Schedule(asNeeded = true, medicationId = medicationId))
-        } else {
-            _uiState.value.schedules.map { schedule ->
-                Schedule(
-                    weekDays = schedule.weekDays,
-                    times = schedule.times,
-                    amounts = schedule.amounts,
-                    asNeeded = false,
+        Log.i("TAG", "saveSchedule: SAVE SCHEDULES")
+        coroutineScope.launch {
+            // Process all schedules
+            _uiState.value.schedules.forEach { scheduleWithDocId ->
+                val schedule = scheduleWithDocId.toSchedule().copy(medicationId = medicationId)
+                Log.i("TAG", "saveSchedule: $scheduleWithDocId")
+
+                if (scheduleWithDocId.docId != null) {
+                    // Update existing schedule
+                    medsRepository.updateMedicationSchedule(
+                        docId = scheduleWithDocId.docId,
+                        schedule = schedule,
+                    )
+                } else {
+                    Log.i("TAG", "CREATE NEW $schedule")
+                    // Create new schedule
+                    medsRepository.addMedicationSchedule(schedule)
+                }
+            }
+
+            // Handle "as needed" special case
+            if (_uiState.value.asNeeded) {
+                val asNeededSchedule = Schedule(
+                    asNeeded = true,
                     medicationId = medicationId
                 )
-            }
-        }
-
-        coroutineScope.launch {
-            schedulesToSave.forEach { schedule ->
-                medsRepository.addMedicationSchedule(schedule)
+                // Find existing "as needed" schedule or create new
+                _uiState.value.schedules
+                    .firstOrNull { it.asNeeded }
+                    ?.docId
+                    ?.let { docId ->
+                        medsRepository.updateMedicationSchedule(asNeededSchedule, docId)
+                    } ?: medsRepository.addMedicationSchedule(asNeededSchedule)
+            } else {
+                // Delete any existing "as needed" schedule
+                _uiState.value.schedules
+                    .firstOrNull { it.asNeeded }
+                    ?.docId
+                    ?.let { docId ->
+                        medsRepository.deleteMedicationSchedule(docId)
+                    }
             }
         }
     }
@@ -116,7 +154,12 @@ class AddScheduleViewModel(
     }
 
     data class AddScheduleUiState(
-        val schedules: List<ScheduleWithDocId> = listOf(ScheduleWithDocId()),
+        val schedules: List<ScheduleWithDocId> = emptyList(),
         val asNeeded: Boolean = false,
-    )
+    ) {
+        constructor(medicationId: String) : this(
+            schedules = listOf(ScheduleWithDocId(medicationId = medicationId)),
+            asNeeded = false
+        )
+    }
 }

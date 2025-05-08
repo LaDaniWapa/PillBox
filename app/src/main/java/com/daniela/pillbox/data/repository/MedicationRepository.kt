@@ -125,6 +125,8 @@ class MedicationRepository(val ctx: Context) {
                 nestedType = Schedule::class.java
             )
 
+            Log.i("TAG", "addMedicationSchedule: $res, $schedule")
+
         } catch (e: Exception) {
             Log.e("TAG", "deleteUserMedication: $e")
         }

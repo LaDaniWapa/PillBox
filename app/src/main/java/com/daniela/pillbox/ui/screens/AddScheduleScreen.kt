@@ -109,13 +109,14 @@ class AddScheduleScreen(
                     )
                 }
 
-                // Add new schedule pattern button
-                Button(
-                    onClick = vm::addSchedule,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Add Another Schedule Pattern")
-                }
+                if (schedulesToEdit == null)
+                    // Add new schedule pattern button
+                    Button(
+                        onClick = vm::addSchedule,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Add Another Schedule Pattern")
+                    }
             }
 
             // Action buttons

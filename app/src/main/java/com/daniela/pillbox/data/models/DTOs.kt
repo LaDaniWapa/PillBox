@@ -94,8 +94,8 @@ data class Schedule(
 data class ScheduleWithDocId(
     val docId: String? = null,
     override val weekDays: List<Int>? = null,
-    override val times: List<String>? = null,
-    override val amounts: List<Int>? = null,
+    override val times: List<String>? = listOf("00:00"),
+    override val amounts: List<Int>? = listOf(1),
     override val asNeeded: Boolean = false,
     override val medicationId: String = "",
 ) : BaseSchedule, Serializable
