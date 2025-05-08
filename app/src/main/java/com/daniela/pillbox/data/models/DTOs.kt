@@ -74,16 +74,18 @@ interface BaseSchedule {
     val times: List<String>?
     val amounts: List<Int>?
     val asNeeded: Boolean
+    val medicationId: String
 }
 
 /**
  * Schedule object.
  */
 data class Schedule(
-    override val weekDays: List<Int>? = null,
+    override val weekDays: List<Int>? = null, // 0 - 6
     override val times: List<String>? = null,
     override val amounts: List<Int>? = null,
     override val asNeeded: Boolean = false,
+    override val medicationId: String = "",
 ) : BaseSchedule, Serializable
 
 /**
@@ -95,6 +97,7 @@ data class ScheduleWithDocId(
     override val times: List<String>? = null,
     override val amounts: List<Int>? = null,
     override val asNeeded: Boolean = false,
+    override val medicationId: String = "",
 ) : BaseSchedule, Serializable
 
 /**
@@ -105,5 +108,17 @@ fun Schedule.withDocId(docId: String) = ScheduleWithDocId(
     weekDays = this.weekDays,
     times = this.times,
     amounts = this.amounts,
-    asNeeded = this.asNeeded
+    asNeeded = this.asNeeded,
+    medicationId = this.medicationId
+)
+
+/**
+ * Converts a ScheduleWithDocId object to a Schedule object.
+ */
+fun ScheduleWithDocId.toSchedule() = Schedule(
+    weekDays = this.weekDays,
+    times = this.times,
+    amounts = this.amounts,
+    asNeeded = this.asNeeded,
+    medicationId = this.medicationId
 )

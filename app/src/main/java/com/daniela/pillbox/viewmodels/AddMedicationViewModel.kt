@@ -1,6 +1,5 @@
 package com.daniela.pillbox.viewmodels
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,7 +26,6 @@ class AddMedicationViewModel(
     private val authRepository: AuthRepository,
     private val medsRepository: MedicationRepository,
     private val savedStateHandle: SavedStateHandle,
-    private val ctx: Context,
     private val medicationToEdit: MedicationWithDocId?,
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)

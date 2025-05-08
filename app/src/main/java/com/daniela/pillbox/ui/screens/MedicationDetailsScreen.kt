@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import cafe.adriel.voyager.core.annotation.ExperimentalVoyagerApi
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -50,11 +52,20 @@ import com.daniela.pillbox.viewmodels.MedicationDetailsViewModel
 class MedicationDetailsScreen(
     private val medication: MedicationWithDocId,
 ) : BaseScreen() {
+    @OptIn(ExperimentalVoyagerApi::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val vm = rememberVoyagerScreenModel<MedicationDetailsViewModel>(medication)
         val state by vm.uiState
+
+        // Reload schedule list when the screen is resumed
+        LaunchedEffect(navigator) {
+            // if the screen is at the top of the pile
+            if (navigator.items.last() is MedicationDetailsScreen) {
+                vm.loadSchedules()
+            }
+        }
 
         if (state.showDeleteDialog)
             DeleteConfirmationDialog(
@@ -83,7 +94,9 @@ class MedicationDetailsScreen(
                     Header()
 
                     // Details
-                    DetailsCard()
+                    DetailsCard {
+                        navigator.replace(AddMedicationScreen(medication))
+                    }
 
                     // Action Buttons
                     Row(
@@ -91,10 +104,10 @@ class MedicationDetailsScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         OutlinedButton(
-                            onClick = { navigator.replace(AddMedicationScreen(medication)) },
+                            onClick = { navigator.push(AddScheduleScreen(medication.docId!!, state.schedules)) },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Edit")
+                            Text("Edit Schedules")
                         }
 
                         Button(
@@ -116,7 +129,6 @@ class MedicationDetailsScreen(
                 items(state.schedules) { schedule ->
                     ScheduleItem(
                         schedule = schedule,
-                        onEdit = { /*vm.onEditingScheduleChange(schedule)*/ },
                         onDelete = {
                             schedule.docId?.let {
                                 vm.deleteSchedule(it)
@@ -193,7 +205,9 @@ class MedicationDetailsScreen(
     }
 
     @Composable
-    private fun DetailsCard() {
+    private fun DetailsCard(
+        onClick: () -> Unit,
+    ) {
         Card(
             shape = MaterialTheme.shapes.medium,
             modifier = Modifier.fillMaxWidth(),
@@ -201,59 +215,63 @@ class MedicationDetailsScreen(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
             )
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Dosage Information
-                DetailRow(
-                    label = "Dosage",
-                    value = "${medication.dosage} ${medication.dosageUnit}"
-                )
-
-                // Stock Information with warning for low stock
-                DetailRow(
-                    label = "Current Stock",
-                    value = when {
-                        medication.stock == null -> "Not tracked"
-                        medication.stock <= 0 -> "Out of stock"
-                        else -> "${medication.stock} remaining"
-                    },
-                    isWarning = medication.stock?.let { it < 5 } == true
-                )
-
-                // Medication Type
-                DetailRow(
-                    label = "Medication Type",
-                    value = medication.type.replaceFirstChar { it.uppercase() }
-                )
-
-                // Instructions (if available)
-                medication.instructions?.let { instructions ->
-                    DetailRow(
-                        label = "Instructions",
-                        value = instructions,
-                        modifier = Modifier.padding(top = 4.dp)
+            Box(modifier = Modifier.fillMaxWidth()) {
+                IconButton(
+                    onClick = onClick,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
-                // Notes (if available)
-                medication.notes?.let { notes ->
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Dosage Information
                     DetailRow(
-                        label = "Additional Notes",
-                        value = notes,
-                        modifier = Modifier.padding(top = 4.dp)
+                        label = "Dosage",
+                        value = "${medication.dosage} ${medication.dosageUnit}"
                     )
-                }
 
-                // Document ID (for debugging/development)
-                if (medication.docId != null) {
+                    // Stock Information with warning for low stock
                     DetailRow(
-                        label = "Document ID",
-                        value = medication.docId,
-                        textStyle = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 8.dp)
+                        label = "Current Stock",
+                        value = when {
+                            medication.stock == null -> "Not tracked"
+                            medication.stock <= 0 -> "Out of stock"
+                            else -> "${medication.stock} remaining"
+                        },
+                        isWarning = medication.stock?.let { it < 5 } == true
                     )
+
+                    // Medication Type
+                    DetailRow(
+                        label = "Medication Type",
+                        value = medication.type.replaceFirstChar { it.uppercase() }
+                    )
+
+                    // Instructions (if available)
+                    medication.instructions?.let { instructions ->
+                        DetailRow(
+                            label = "Instructions",
+                            value = instructions,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+
+                    // Notes (if available)
+                    medication.notes?.let { notes ->
+                        DetailRow(
+                            label = "Additional Notes",
+                            value = notes,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
                 }
             }
         }
@@ -288,7 +306,6 @@ class MedicationDetailsScreen(
     @Composable
     fun ScheduleItem(
         schedule: ScheduleWithDocId,
-        onEdit: () -> Unit,
         onDelete: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
@@ -317,7 +334,7 @@ class MedicationDetailsScreen(
 
                     Spacer(Modifier.weight(1f))
 
-                    // Action buttons
+                    // Delete button
                     IconButton(onClick = onDelete, modifier = Modifier.padding(0.dp)) {
                         Icon(
                             Icons.Rounded.Delete,
@@ -325,9 +342,6 @@ class MedicationDetailsScreen(
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(0.dp)
                         )
-                    }
-                    IconButton(onClick = onEdit) {
-                        Icon(Icons.Rounded.Edit, "Edit schedule")
                     }
                 }
 

@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .padding(horizontal = 16.dp)
                     ) {
-                        Navigator(AddScheduleScreen("68179e43002e99922f9b"))
+                        Navigator(HomeScreen())
                     }
                 }
             }

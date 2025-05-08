@@ -470,9 +470,13 @@ fun TimePickerButton(
     modifier: Modifier = Modifier,
     label: String? = "Select Time",
     onTimeSelected: (Int, Int) -> Unit = { _, _ -> },
+    initialTime: List<Int>? = null,
 ) {
     val visibleState = remember { mutableStateOf(false) }
-    val timePickerState = rememberTimePickerState()
+    val timePickerState = rememberTimePickerState(
+        initialHour = initialTime?.get(0) ?: 0,
+        initialMinute = initialTime?.get(1) ?: 0
+    )
 
     Column {
         Text(

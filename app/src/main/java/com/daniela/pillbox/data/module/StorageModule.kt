@@ -3,6 +3,7 @@ package com.daniela.pillbox.data.module
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.daniela.pillbox.data.models.MedicationWithDocId
+import com.daniela.pillbox.data.models.ScheduleWithDocId
 import com.daniela.pillbox.data.repository.MedicationRepository
 import com.daniela.pillbox.viewmodels.AddMedicationViewModel
 import com.daniela.pillbox.viewmodels.AddScheduleViewModel
@@ -30,7 +31,6 @@ val storageModule = module {
             medsRepository = get(),
             savedStateHandle = savedStateHandle,
             medicationToEdit = medicationToEdit,
-            ctx = ctx
         )
     }
 
@@ -41,10 +41,11 @@ val storageModule = module {
         )
     }
 
-    factory { (ctx: Context, medicationId: String) ->
+    factory { (ctx: Context, medicationId: String, schedulesToEdit: List<ScheduleWithDocId>?) ->
         AddScheduleViewModel(
             medsRepository = get(),
-            medicationId = medicationId
+            medicationId = medicationId,
+            schedulesToEdit = schedulesToEdit
         )
     }
 }

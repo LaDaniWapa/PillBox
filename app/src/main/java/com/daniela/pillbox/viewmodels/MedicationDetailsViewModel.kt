@@ -33,7 +33,7 @@ class MedicationDetailsViewModel(
     /**
      * Called when the user confirms the deletion of a schedule.
      */
-    private fun loadSchedules() {
+    fun loadSchedules() {
         _uiState.value = _uiState.value.copy(isLoading = true)
 
         coroutineScope.launch {

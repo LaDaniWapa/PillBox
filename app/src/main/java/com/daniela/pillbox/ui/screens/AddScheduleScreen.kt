@@ -1,5 +1,6 @@
 package com.daniela.pillbox.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,40 +23,36 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.daniela.pillbox.data.models.ScheduleWithDocId
 import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.TimePickerButton
 import com.daniela.pillbox.viewmodels.AddScheduleViewModel
 
 class AddScheduleScreen(
     private val medicationId: String,
+    private val schedulesToEdit: List<ScheduleWithDocId>? = null,
 ) : BaseScreen() {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val vm = rememberVoyagerScreenModel<AddScheduleViewModel>(medicationId)
+        val vm = rememberVoyagerScreenModel<AddScheduleViewModel>(medicationId, schedulesToEdit)
         val state by vm.uiState
 
         Column(
@@ -104,9 +100,9 @@ class AddScheduleScreen(
 
             // List of schedule entries
             if (!state.asNeeded) {
-                state.scheduleEntries.forEachIndexed { index, entry ->
+                state.schedules.forEachIndexed { index, schedule ->
                     ScheduleEntryItem(
-                        entry = entry,
+                        schedule = schedule,
                         state = state,
                         index = index,
                         vm = vm
@@ -115,7 +111,7 @@ class AddScheduleScreen(
 
                 // Add new schedule pattern button
                 Button(
-                    onClick = vm::addScheduleEntry,
+                    onClick = vm::addSchedule,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Add Another Schedule Pattern")
@@ -132,7 +128,7 @@ class AddScheduleScreen(
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
-                    onClick = {}
+                    onClick = { vm.saveSchedule(); navigator.pop() }
                 ) {
                     Text("Save Schedule")
                 }
@@ -140,25 +136,16 @@ class AddScheduleScreen(
         }
     }
 
-    // State for the entire form
-    data class ScheduleEntry(
-        val days: Set<Int> = emptySet(),
-        val timesWithAmounts: List<Pair<String, Int>> = listOf("" to 1),
-    )
-
     @Composable
     private fun ScheduleEntryItem(
         vm: AddScheduleViewModel,
         state: AddScheduleViewModel.AddScheduleUiState,
-        entry: ScheduleEntry,
+        schedule: ScheduleWithDocId,
         index: Int,
     ) {
         Card(
             shape = MaterialTheme.shapes.medium,
             modifier = Modifier.fillMaxWidth(),
-            /*colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            )*/
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -166,20 +153,24 @@ class AddScheduleScreen(
             ) {
                 Text("On these days")
                 // Days selection
+                val days = schedule.weekDays ?: emptyList()
                 WeekDaySelector(
-                    selectedDays = entry.days,
+                    selectedDays = days,
                     onDaySelected = { day ->
-                        val newDays = if (entry.days.contains(day)) {
-                            entry.days - day
+                        val newDays = if (days.contains(day)) {
+                            days - day
                         } else {
-                            entry.days + day
+                            days + day
                         }
-                        vm.updateEntry(index, entry.copy(days = newDays))
+                        vm.updateSchedule(index, schedule.copy(weekDays = newDays))
                     }
                 )
 
                 // Times with amounts
-                entry.timesWithAmounts.forEachIndexed { timeIndex, (time, amount) ->
+                val timesWithAmounts =
+                    (schedule.times ?: listOf("00:00")).zip((schedule.amounts ?: listOf(1)))
+
+                timesWithAmounts.forEachIndexed { timeIndex, (time, amount) ->
                     Row(
                         verticalAlignment = Alignment.Top,
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -188,12 +179,17 @@ class AddScheduleScreen(
                         // Time input
                         TimePickerButton(
                             onTimeSelected = { hour, min ->
-                                val newTime = String.format("%02d:%02d", hour, min)
-                                val updatedTimes = entry.timesWithAmounts.toMutableList().apply {
+                                val newTime = String.format(null, "%02d:%02d", hour, min)
+                                val updatedTimes = timesWithAmounts.toMutableList().apply {
                                     set(timeIndex, newTime to amount)
                                 }
-                                vm.updateEntry(index, entry.copy(timesWithAmounts = updatedTimes))
-                            }
+                                vm.updateSchedule(
+                                    index, schedule.copy(
+                                        times = updatedTimes.map { it.first },
+                                    )
+                                )
+                            },
+                            initialTime = time.split(":").map { it.toInt() }
                         )
 
                         // Amount input
@@ -202,10 +198,14 @@ class AddScheduleScreen(
                             label = "Amount",
                             value = amount.toString(),
                             onValueChange = { newAmount ->
-                                val updatedTimes = entry.timesWithAmounts.toMutableList().apply {
-                                    set(timeIndex, time to (newAmount.toIntOrNull() ?: 1))
-                                }
-                                vm.updateEntry(index, entry.copy(timesWithAmounts = updatedTimes))
+                                val updatedTimes =
+                                    timesWithAmounts.toMutableList().apply {
+                                        set(timeIndex, time to (newAmount.toIntOrNull() ?: 1))
+                                    }
+                                vm.updateSchedule(
+                                    index, schedule.copy(
+                                        amounts = updatedTimes.map { it.second }
+                                    ))
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
@@ -213,10 +213,15 @@ class AddScheduleScreen(
                         // Remove time button
                         if (timeIndex > 0) {
                             IconButton(onClick = {
-                                val updatedTimes = entry.timesWithAmounts.toMutableList().apply {
-                                    removeAt(timeIndex)
-                                }
-                                vm.updateEntry(index, entry.copy(timesWithAmounts = updatedTimes))
+                                val updatedTimes =
+                                    timesWithAmounts.toMutableList().apply {
+                                        removeAt(timeIndex)
+                                    }
+                                vm.updateSchedule(
+                                    index, schedule.copy(
+                                        times = updatedTimes.map { it.first },
+                                    )
+                                )
                             }) {
                                 Icon(Icons.Rounded.Close, "Remove time")
                             }
@@ -227,18 +232,25 @@ class AddScheduleScreen(
                 // Add time button
                 Button(
                     onClick = {
-                        val updatedTimes = entry.timesWithAmounts + ("" to 1)
-                        vm.updateEntry(index, entry.copy(timesWithAmounts = updatedTimes))
+                        val updatedTimes = timesWithAmounts + ("00:00" to 1)
+                        Log.i("TAG", "ScheduleEntryItem: $updatedTimes")
+                        vm.updateSchedule(
+                            index, schedule.copy(
+                                times = updatedTimes.map { it.first },
+                                amounts = updatedTimes.map { it.second }
+                            )
+                        )
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Add Another Time")
                 }
 
+
                 // Remove entire schedule pattern button
-                if (entry != state.scheduleEntries.first()) {
+                if (schedule !== state.schedules.first()) {
                     OutlinedButton(
-                        onClick = { vm.removeTimeEntry(index) },
+                        onClick = { vm.removeSchedule(index) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colorScheme.error
@@ -253,15 +265,15 @@ class AddScheduleScreen(
 
     @Composable
     private fun WeekDaySelector(
-        selectedDays: Set<Int>,
+        selectedDays: List<Int>,
         onDaySelected: (Int) -> Unit,
     ) {
         // Days labels starting with Monday
         // TODO: Translate this
         // TODO: Change colors
         val days = listOf("M", "T", "W", "T", "F", "S", "S")
-        // Day indices now Monday(1) to Sunday(0) - adjusted to start with Monday
-        val dayIndices = listOf(1, 2, 3, 4, 5, 6, 0)
+        // Day indices now Monday(0) to Sunday(6) - adjusted to start with Monday
+        val dayIndices = listOf(0, 1, 2, 3, 4, 5, 6)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
