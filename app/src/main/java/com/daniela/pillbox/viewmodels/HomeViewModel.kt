@@ -1,6 +1,9 @@
 package com.daniela.pillbox.viewmodels
 
 import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -67,9 +70,19 @@ class HomeViewModel(
     init {
         checkAuthState()
         loadMedications()
+        checkPermissions()
     }
 
-    // Methods
+    private fun checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val intent = Intent().apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+            }
+            ctx.startActivity(intent)
+        }
+    }
+
     /**
      * Checks the authentication state of the user.
      */

@@ -371,7 +371,6 @@ class MedicationDetailsScreen(
                                         style = MaterialTheme.typography.bodyLarge,
                                         modifier = Modifier.padding(end = 16.dp, top = 4.dp)
                                     )
-
                                 }
                             }
                         }
@@ -379,5 +378,4 @@ class MedicationDetailsScreen(
             }
         }
     }
-
 }

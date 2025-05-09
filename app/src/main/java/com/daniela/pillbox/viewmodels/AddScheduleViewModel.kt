@@ -1,6 +1,5 @@
 package com.daniela.pillbox.viewmodels
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
@@ -48,25 +47,27 @@ class AddScheduleViewModel(
                 asNeeded = !_uiState.value.asNeeded,
                 schedules = if (!_uiState.value.asNeeded) {
                     // When enabling "as needed", clear other schedules
-                    listOf(ScheduleWithDocId(
-                        docId = _uiState.value.schedules.firstOrNull()?.docId,
-                        asNeeded = true,
-                        medicationId = medicationId
-                    ))
+                    listOf(
+                        ScheduleWithDocId(
+                            docId = _uiState.value.schedules.firstOrNull()?.docId,
+                            asNeeded = true,
+                            medicationId = medicationId
+                        )
+                    )
                 } else {
                     // When disabling "as needed", add a default schedule
-                    listOf(ScheduleWithDocId(
-                        docId = _uiState.value.schedules.firstOrNull()?.docId,
-                        medicationId = medicationId
-                    ))
+                    listOf(
+                        ScheduleWithDocId(
+                            docId = _uiState.value.schedules.firstOrNull()?.docId,
+                            medicationId = medicationId
+                        )
+                    )
                 }
             )
         }
     }
 
     fun updateSchedule(index: Int, schedule: ScheduleWithDocId) {
-        Log.i("TAG", "updateSchedule: $schedule")
-
         val updatedSchedules = _uiState.value.schedules.toMutableList().apply {
             set(index, schedule)
         }
@@ -103,12 +104,10 @@ class AddScheduleViewModel(
     }
 
     fun saveSchedule() {
-        Log.i("TAG", "saveSchedule: SAVE SCHEDULES")
         coroutineScope.launch {
             // Process all schedules
             _uiState.value.schedules.forEach { scheduleWithDocId ->
                 val schedule = scheduleWithDocId.toSchedule().copy(medicationId = medicationId)
-                Log.i("TAG", "saveSchedule: $scheduleWithDocId")
 
                 if (scheduleWithDocId.docId != null) {
                     // Update existing schedule
@@ -117,7 +116,6 @@ class AddScheduleViewModel(
                         schedule = schedule,
                     )
                 } else {
-                    Log.i("TAG", "CREATE NEW $schedule")
                     // Create new schedule
                     medsRepository.addMedicationSchedule(schedule)
                 }
