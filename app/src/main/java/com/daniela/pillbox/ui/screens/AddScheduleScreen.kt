@@ -35,11 +35,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.daniela.pillbox.R
 import com.daniela.pillbox.data.models.ScheduleWithDocId
 import com.daniela.pillbox.ui.components.LabelTextField
 import com.daniela.pillbox.ui.components.TimePickerButton
@@ -70,7 +72,7 @@ class AddScheduleScreen(
                 IconButton(onClick = { navigator.pop() }) {
                     Icon(
                         imageVector = Icons.Rounded.ChevronLeft,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -115,7 +117,7 @@ class AddScheduleScreen(
                         onClick = vm::addSchedule,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Add Another Schedule Pattern")
+                        Text(stringResource(R.string.add_another_schedule_pattern))
                     }
             }
 
@@ -125,13 +127,13 @@ class AddScheduleScreen(
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(onClick = { }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = { vm.saveSchedule(); navigator.pop() }
                 ) {
-                    Text("Save Schedule")
+                    Text(stringResource(R.string.save_schedule))
                 }
             }
         }
@@ -152,7 +154,7 @@ class AddScheduleScreen(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("On these days")
+                Text(stringResource(R.string.on_these_days))
                 // Days selection
                 val days = schedule.weekDays ?: emptyList()
                 WeekDaySelector(
@@ -196,7 +198,7 @@ class AddScheduleScreen(
                         // Amount input
                         LabelTextField(
                             modifier = Modifier.width(80.dp),
-                            label = "Amount",
+                            label = stringResource(R.string.amount),
                             value = amount.toString(),
                             onValueChange = { newAmount ->
                                 val updatedTimes =
@@ -224,7 +226,7 @@ class AddScheduleScreen(
                                     )
                                 )
                             }) {
-                                Icon(Icons.Rounded.Close, "Remove time")
+                                Icon(Icons.Rounded.Close, stringResource(R.string.remove_time))
                             }
                         }
                     }
@@ -244,7 +246,7 @@ class AddScheduleScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Add Another Time")
+                    Text(stringResource(R.string.add_another_time))
                 }
 
 
@@ -257,7 +259,7 @@ class AddScheduleScreen(
                             contentColor = MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Text("Remove This Pattern")
+                        Text(stringResource(R.string.remove_this_pattern))
                     }
                 }
             }

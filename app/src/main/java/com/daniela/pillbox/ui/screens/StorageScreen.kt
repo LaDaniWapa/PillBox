@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
@@ -48,6 +49,7 @@ import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.daniela.pillbox.R
 import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.ui.components.DeleteConfirmationDialog
 import com.daniela.pillbox.ui.components.FullScreenLoader
@@ -89,13 +91,13 @@ class StorageScreen : BaseScreen() {
                     IconButton(onClick = { navigator.pop() }) {
                         Icon(
                             imageVector = Icons.Rounded.ChevronLeft,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Medication Storage",
+                        text = stringResource(R.string.medication_storage),
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.weight(1f)
                     )
@@ -116,12 +118,12 @@ class StorageScreen : BaseScreen() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.TopStart),
-                        placeholder = { Text("Search medications...") },
+                        placeholder = { Text(stringResource(R.string.search_medications)) },
                         leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
                         trailingIcon = {
                             if (state.searchQuery.isNotEmpty()) {
                                 IconButton(onClick = { vm.onSearchQueryChanged("") }) {
-                                    Icon(Icons.Rounded.Close, contentDescription = "Clear")
+                                    Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.clear))
                                 }
                             }
                         },
@@ -162,7 +164,7 @@ class StorageScreen : BaseScreen() {
     private fun ErrorView(error: String?) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
-                error ?: "There was an error",
+                error ?: stringResource(R.string.there_was_an_error),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.error
             )
@@ -185,7 +187,7 @@ class StorageScreen : BaseScreen() {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No medications found", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.no_medications_found), style = MaterialTheme.typography.bodyLarge)
                 }
             } else {
                 LazyColumn(
@@ -216,7 +218,7 @@ class StorageScreen : BaseScreen() {
                 modifier = Modifier.padding(16.dp),
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Rounded.Add, contentDescription = "Add medication")
+                Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_medication))
             }
         }
     }
@@ -283,7 +285,7 @@ private fun MedicationStorageItem(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Delete,
-                        contentDescription = "Delete medication",
+                        contentDescription = stringResource(R.string.delete_medication),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -336,9 +338,9 @@ private fun StockIndicator(stock: Int?) {
     ) {
         Text(
             text = when {
-                stock <= 0 -> "Out"
-                stock < 5 -> "Low: $stock"
-                else -> "$stock left"
+                stock <= 0 -> stringResource(R.string.out)
+                stock < 5 -> stringResource(R.string.low, stock)
+                else -> stringResource(R.string.left, stock)
             },
             style = MaterialTheme.typography.labelSmall
         )

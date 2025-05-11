@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,7 @@ import cafe.adriel.voyager.core.annotation.ExperimentalVoyagerApi
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.daniela.pillbox.R
 import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.data.models.ScheduleWithDocId
 import com.daniela.pillbox.ui.components.DayIndicator
@@ -69,8 +71,8 @@ class MedicationDetailsScreen(
 
         if (state.showDeleteDialog)
             DeleteConfirmationDialog(
-                description = "Are you sure you want to delete this schedule?",
-                title = "Delete Schedule?",
+                description = stringResource(R.string.are_you_sure_you_want_to_delete_this_schedule),
+                title = stringResource(R.string.delete_schedule),
                 onDismiss = vm::dismissDialog,
                 onConfirm = vm::confirmDeleteSchedule
             )
@@ -107,14 +109,14 @@ class MedicationDetailsScreen(
                             onClick = { navigator.push(AddScheduleScreen(medication.docId!!, state.schedules)) },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Edit Schedules")
+                            Text(stringResource(R.string.edit_schedules))
                         }
 
                         Button(
                             onClick = { navigator.push(AddScheduleScreen(medication.docId!!)) },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Add Schedule")
+                            Text(stringResource(R.string.add_schedule))
                         }
                     }
                 }
@@ -149,13 +151,13 @@ class MedicationDetailsScreen(
             IconButton(onClick = { navigator.pop() }) {
                 Icon(
                     imageVector = Icons.Rounded.ChevronLeft,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = "Medication Details",
+                text = stringResource(R.string.medication_details),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.weight(1f)
             )
@@ -224,7 +226,7 @@ class MedicationDetailsScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Edit,
-                        contentDescription = "Edit",
+                        contentDescription = stringResource(R.string.edit),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -234,31 +236,31 @@ class MedicationDetailsScreen(
                 ) {
                     // Dosage Information
                     DetailRow(
-                        label = "Dosage",
+                        label = stringResource(R.string.dosage),
                         value = "${medication.dosage} ${medication.dosageUnit}"
                     )
 
                     // Stock Information with warning for low stock
                     DetailRow(
-                        label = "Current Stock",
+                        label = stringResource(R.string.current_stock),
                         value = when {
-                            medication.stock == null -> "Not tracked"
-                            medication.stock <= 0 -> "Out of stock"
-                            else -> "${medication.stock} remaining"
+                            medication.stock == null -> stringResource(R.string.not_tracked)
+                            medication.stock <= 0 -> stringResource(R.string.out_of_stock)
+                            else -> stringResource(R.string.remaining, medication.stock)
                         },
                         isWarning = medication.stock?.let { it < 5 } == true
                     )
 
                     // Medication Type
                     DetailRow(
-                        label = "Medication Type",
+                        label = stringResource(R.string.medication_type),
                         value = medication.type.replaceFirstChar { it.uppercase() }
                     )
 
                     // Instructions (if available)
                     medication.instructions?.let { instructions ->
                         DetailRow(
-                            label = "Instructions",
+                            label = stringResource(R.string.instructions),
                             value = instructions,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -267,7 +269,7 @@ class MedicationDetailsScreen(
                     // Notes (if available)
                     medication.notes?.let { notes ->
                         DetailRow(
-                            label = "Additional Notes",
+                            label = stringResource(R.string.additional_notes),
                             value = notes,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -323,7 +325,7 @@ class MedicationDetailsScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (schedule.asNeeded)
                         Text(
-                            text = "As needed",
+                            text = stringResource(R.string.as_needed),
                             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
@@ -338,7 +340,7 @@ class MedicationDetailsScreen(
                     IconButton(onClick = onDelete, modifier = Modifier.padding(0.dp)) {
                         Icon(
                             Icons.Rounded.Delete,
-                            "Delete",
+                            stringResource(R.string.delete),
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(0.dp)
                         )
@@ -354,7 +356,7 @@ class MedicationDetailsScreen(
 
                         Column {
                             Text(
-                                text = "Times:",
+                                text = stringResource(R.string.times),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
@@ -367,7 +369,7 @@ class MedicationDetailsScreen(
                                     )
                                     Spacer(Modifier.weight(1f))
                                     Text(
-                                        text = "$amount units",
+                                        text = stringResource(R.string.units, amount),
                                         style = MaterialTheme.typography.bodyLarge,
                                         modifier = Modifier.padding(end = 16.dp, top = 4.dp)
                                     )

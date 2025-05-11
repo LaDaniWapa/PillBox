@@ -59,7 +59,7 @@ class LoginScreen : BaseScreen() {
             // Logo
             Icon(
                 painter = painterResource(R.drawable.pillbox_logo),
-                contentDescription = "Logo",
+                contentDescription = stringResource(R.string.logo),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .fillMaxWidth()

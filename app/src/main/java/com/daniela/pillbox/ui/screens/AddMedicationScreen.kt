@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,7 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.daniela.pillbox.R
 import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.libs.colorpicker.ColorPicker
 import com.daniela.pillbox.libs.colorpicker.ColorPickerType
@@ -69,14 +71,14 @@ class AddMedicationScreen(private val medicationToEdit: MedicationWithDocId? = n
                 IconButton(onClick = { navigator.pop() }) {
                     Icon(
                         Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
 
                 // Title
                 Text(
-                    text = "New Medication",
+                    text = stringResource(R.string.new_medication),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -91,7 +93,7 @@ class AddMedicationScreen(private val medicationToEdit: MedicationWithDocId? = n
                 // Medication Name
                 LabelTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    label = "Medication Name",
+                    label = stringResource(R.string.medication_name),
                     value = vm.name,
                     onValueChange = { vm.onNameChange(it) },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -104,7 +106,7 @@ class AddMedicationScreen(private val medicationToEdit: MedicationWithDocId? = n
                 ) {
                     LabelTextField(
                         modifier = Modifier.weight(1f),
-                        label = "Dosage",
+                        label = stringResource(R.string.dosage),
                         value = vm.dosage,
                         onValueChange = { vm.onDosageChange(it) },
                         keyboardOptions = KeyboardOptions(
@@ -114,7 +116,7 @@ class AddMedicationScreen(private val medicationToEdit: MedicationWithDocId? = n
 
                     LabelTextField(
                         modifier = Modifier.weight(1f),
-                        label = "Unit",
+                        label = stringResource(R.string.unit),
                         value = vm.dosageUnit,
                         onValueChange = { vm.onDosageUnitChange(it) },
                     )
@@ -123,7 +125,7 @@ class AddMedicationScreen(private val medicationToEdit: MedicationWithDocId? = n
                 // Medication Type Dropdown
                 DropDownMenu(
                     list = vm.medicationTypes,
-                    label = "Type",
+                    label = stringResource(R.string.type),
                     onSelected = { vm.onTypeChange(vm.medicationTypes[it]) },
                 )
 
@@ -132,7 +134,7 @@ class AddMedicationScreen(private val medicationToEdit: MedicationWithDocId? = n
                     modifier = Modifier.fillMaxWidth(),
                     value = vm.stock,
                     onValueChange = { vm.onStockChange(it) },
-                    label = "Stock Quantity",
+                    label = stringResource(R.string.stock_quantity),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Next
@@ -143,7 +145,7 @@ class AddMedicationScreen(private val medicationToEdit: MedicationWithDocId? = n
                 LabelTextField(
                     value = vm.instructions,
                     onValueChange = { vm.onInstructionsChange(it) },
-                    label = "Instructions",
+                    label = stringResource(R.string.instructions),
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
@@ -155,7 +157,7 @@ class AddMedicationScreen(private val medicationToEdit: MedicationWithDocId? = n
                 LabelTextField(
                     value = vm.notes,
                     onValueChange = { vm.onNotesChange(it) },
-                    label = "Notes",
+                    label = stringResource(R.string.notes),
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
@@ -186,7 +188,7 @@ class AddMedicationScreen(private val medicationToEdit: MedicationWithDocId? = n
                         .padding(16.dp),
                     enabled = true
                 ) {
-                    Text("Save Medication")
+                    Text(stringResource(R.string.save_medication))
                 }
             }
         }

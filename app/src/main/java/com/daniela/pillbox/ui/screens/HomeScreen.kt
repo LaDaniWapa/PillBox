@@ -24,10 +24,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.daniela.pillbox.R
 import com.daniela.pillbox.ui.components.FullScreenLoader
 import com.daniela.pillbox.ui.components.MedicationItem
 import com.daniela.pillbox.viewmodels.HomeViewModel
@@ -98,22 +100,22 @@ class HomeScreen : BaseScreen() {
             // Options Menu
             Box {
                 IconButton(onClick = { vm.showMenu = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.menu))
                 }
                 DropdownMenu(
                     expanded = vm.showMenu,
                     onDismissRequest = { vm.showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Storage") },
+                        text = { Text(stringResource(R.string.storage)) },
                         onClick = { navigator.push(StorageScreen()) }
                     )
                     DropdownMenuItem(
-                        text = { Text("Reload") },
+                        text = { Text(stringResource(R.string.reload)) },
                         onClick = { /*navigator.push(StorageScreen())*/ }
                     )
                     DropdownMenuItem(
-                        text = { Text("Logout") },
+                        text = { Text(stringResource(R.string.logout)) },
                         onClick = { vm.logout() }
                     )
                 }
@@ -124,7 +126,7 @@ class HomeScreen : BaseScreen() {
 
         // Today's medications
         Text(
-            text = "Today's Medications",
+            text = stringResource(R.string.today_s_medications),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -138,7 +140,7 @@ class HomeScreen : BaseScreen() {
                 Button(
                     onClick = {}
                 ) {
-                    Text("Add Alarm")
+                    Text(stringResource(R.string.add_alarm))
                 }
             }
 
