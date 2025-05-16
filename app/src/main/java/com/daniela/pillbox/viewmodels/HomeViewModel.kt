@@ -1,5 +1,6 @@
 package com.daniela.pillbox.viewmodels
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -13,6 +14,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
 import com.daniela.pillbox.data.models.Medication
 import com.daniela.pillbox.data.repository.AuthRepository
+import com.daniela.pillbox.receivers.AlarmReceiver
 import com.daniela.pillbox.utils.capitalized
 import io.appwrite.models.User
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 import java.util.Calendar
 
 /**
@@ -109,6 +112,40 @@ class HomeViewModel(
         coroutineScope.launch {
             _medications.addAll(generateSampleMedications())
         }
+    }
+
+    fun scheduleMedicationAlarm(medicationTime: LocalTime, medicationId: String) {
+        val alarmManager = ctx.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+        val intent = Intent(ctx, AlarmReceiver::class.java).apply {
+            putExtra("medicationId", medicationId)
+            action = "ACTION_SHOW_ALARM"
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            ctx, medicationId.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.HOUR_OF_DAY, medicationTime.hour)
+            set(Calendar.MINUTE, medicationTime.minute)
+            set(Calendar.SECOND, 0)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                android.app.AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.setExact(
+                android.app.AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+        }
+
     }
 
     /**
