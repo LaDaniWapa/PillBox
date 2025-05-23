@@ -39,6 +39,10 @@ class MedicationRepository(val ctx: Context) {
         _medications.value = documents.map { it.data.withDocId(it.id) }
     }
 
+    fun getMedication(docId: String): MedicationWithDocId? {
+        return _medications.value.find { it.docId == docId }
+    }
+
     /**
      * Deletes a medication from the database and update the local medication list
      */

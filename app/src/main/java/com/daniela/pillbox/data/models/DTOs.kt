@@ -67,6 +67,21 @@ data class MedicationWithDocId(
 ) : BaseMedication, Serializable
 
 /**
+ * Converts a MedicationWithDocId object to a Medication object.
+ */
+fun MedicationWithDocId.toMedication() = Medication(
+    userId = this.userId,
+    name = this.name,
+    dosage = this.dosage,
+    dosageUnit = this.dosageUnit,
+    type = this.type,
+    stock = this.stock,
+    instructions = this.instructions,
+    notes = this.notes,
+    color = this.color
+)
+
+/**
  * Interface for schedule objects.
  */
 interface BaseSchedule {

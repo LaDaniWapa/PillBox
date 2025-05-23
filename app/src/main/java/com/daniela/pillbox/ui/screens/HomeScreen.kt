@@ -138,7 +138,9 @@ class HomeScreen : BaseScreen() {
         ) {
             item {
                 Button(
-                    onClick = {}
+                    onClick = {
+                        vm.testAlarmSystem()
+                    }
                 ) {
                     Text(stringResource(R.string.add_alarm))
                 }

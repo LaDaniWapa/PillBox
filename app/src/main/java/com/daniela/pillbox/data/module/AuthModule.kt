@@ -28,6 +28,6 @@ val authModule = module {
     }
 
     factory { (ctx: Context) ->
-        HomeViewModel(authRepository = get(), ctx = ctx)
+        HomeViewModel(authRepository = get(), alarmScheduler = get(), ctx = ctx)
     }
 }

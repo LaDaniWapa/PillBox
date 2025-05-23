@@ -1,6 +1,7 @@
 package com.daniela.pillbox
 
 import android.app.Application
+import com.daniela.pillbox.data.module.alarmModule
 import com.daniela.pillbox.data.module.authModule
 import com.daniela.pillbox.data.module.storageModule
 import org.koin.android.ext.koin.androidContext
@@ -20,7 +21,7 @@ class MainApplication : Application() {
             androidLogger()
             androidContext(this@MainApplication)
             modules(
-                authModule, storageModule
+                authModule, storageModule, alarmModule
             )
         }
     }

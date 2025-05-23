@@ -1,10 +1,12 @@
 package com.daniela.pillbox.viewmodels
 
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.provider.Settings
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -12,9 +14,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
+import com.daniela.pillbox.activity.MainActivity
 import com.daniela.pillbox.data.models.Medication
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.receivers.AlarmReceiver
+import com.daniela.pillbox.utils.AlarmScheduler
 import com.daniela.pillbox.utils.capitalized
 import io.appwrite.models.User
 import kotlinx.coroutines.CoroutineScope
@@ -25,14 +29,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalTime
 import java.util.Calendar
+import java.util.Date
 
 /**
  * ViewModel for the Home screen.
  */
 class HomeViewModel(
     private val authRepository: AuthRepository,
+    private val alarmScheduler: AlarmScheduler,
     private val ctx: Context,
 ) : ScreenModel {
     sealed class AuthState {
@@ -73,17 +78,6 @@ class HomeViewModel(
     init {
         checkAuthState()
         loadMedications()
-        checkPermissions()
-    }
-
-    private fun checkPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val intent = Intent().apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
-            }
-            ctx.startActivity(intent)
-        }
     }
 
     /**
@@ -112,40 +106,6 @@ class HomeViewModel(
         coroutineScope.launch {
             _medications.addAll(generateSampleMedications())
         }
-    }
-
-    fun scheduleMedicationAlarm(medicationTime: LocalTime, medicationId: String) {
-        val alarmManager = ctx.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-        val intent = Intent(ctx, AlarmReceiver::class.java).apply {
-            putExtra("medicationId", medicationId)
-            action = "ACTION_SHOW_ALARM"
-        }
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            ctx, medicationId.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, medicationTime.hour)
-            set(Calendar.MINUTE, medicationTime.minute)
-            set(Calendar.SECOND, 0)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                android.app.AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                android.app.AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntent
-            )
-        }
-
     }
 
     /**
@@ -217,6 +177,82 @@ class HomeViewModel(
             currentUser.name.isNotEmpty() -> currentUser.name.capitalized()
             currentUser.email.isNotEmpty() -> currentUser.email.substringBefore("@").capitalized()
             else -> "User" // Fallback
+        }
+    }
+
+    // Testing func
+    fun testAlarmSystem() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = ctx.getSystemService(AlarmManager::class.java)
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Log.e("ALARM_TEST", "Exact alarms not permitted")
+                Toast.makeText(ctx, "Enable exact alarms in settings", Toast.LENGTH_LONG).show()
+                return
+            }
+        }
+
+        sendAlarm()
+        Toast.makeText(ctx, "Test alarm scheduled for 10 seconds from now", Toast.LENGTH_SHORT)
+            .show()
+    }
+
+    // Testing func
+    fun sendAlarm() {
+        coroutineScope.launch {
+            println("⏳ Starting alarm test...")
+
+            val activity = ctx as? MainActivity ?: run {
+                println("❌ Could not access MainActivity")
+                return@launch
+            }
+
+            activity.checkAndRequestPermissions(
+                action = {
+                    // Generate unique request code each time
+                    val requestCode = System.currentTimeMillis().toInt()
+                    val alarmTime =
+                        Calendar.getInstance().apply { add(Calendar.SECOND, 10) }.timeInMillis
+
+                    println("⏰ Scheduling test alarm #$requestCode for ${Date(alarmTime)}")
+
+                    val intent = Intent(ctx, AlarmReceiver::class.java).apply {
+                        action = "com.daniela.pillbox.TEST_ALARM_$requestCode" // Unique action
+                        putExtra("test_alarm", true)
+                        putExtra("request_code", requestCode)
+                    }
+
+                    val pendingIntent = PendingIntent.getBroadcast(
+                        ctx,
+                        requestCode,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+
+                    ctx.getSystemService(AlarmManager::class.java).apply {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            if (canScheduleExactAlarms()) {
+                                setExactAndAllowWhileIdle(
+                                    AlarmManager.RTC_WAKEUP,
+                                    alarmTime,
+                                    pendingIntent
+                                )
+                            }
+                        } else {
+                            setExact(
+                                AlarmManager.RTC_WAKEUP,
+                                alarmTime,
+                                pendingIntent
+                            )
+                        }
+                    }
+
+                    Toast.makeText(ctx, "Alarm #$requestCode scheduled", Toast.LENGTH_SHORT).show()
+                },
+                onDenied = {
+                    println("🔒 Permissions not granted")
+                    Toast.makeText(ctx, "Permissions required", Toast.LENGTH_LONG).show()
+                }
+            )
         }
     }
 
