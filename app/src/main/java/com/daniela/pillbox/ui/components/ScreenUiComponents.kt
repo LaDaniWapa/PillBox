@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.daniela.pillbox.data.models.Medication
+import com.daniela.pillbox.data.models.MedicationWithDocId
 
 // TODO: redo this file. Merge this with the one in [StorageScreen]
 
@@ -39,7 +40,7 @@ import com.daniela.pillbox.data.models.Medication
  */
 @Composable
 fun MedicationItem(
-    medication: Medication,
+    medication: MedicationWithDocId,
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {

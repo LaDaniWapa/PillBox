@@ -22,6 +22,7 @@ val storageModule = module {
         StorageViewModel(
             authRepository = get(),
             medsRepository = get(),
+            ctx = ctx
         )
     }
 
@@ -31,6 +32,7 @@ val storageModule = module {
             medsRepository = get(),
             savedStateHandle = savedStateHandle,
             medicationToEdit = medicationToEdit,
+            ctx = ctx
         )
     }
 
@@ -45,7 +47,8 @@ val storageModule = module {
         AddScheduleViewModel(
             medsRepository = get(),
             medicationId = medicationId,
-            schedulesToEdit = schedulesToEdit
+            schedulesToEdit = schedulesToEdit,
+            ctx = ctx
         )
     }
 }

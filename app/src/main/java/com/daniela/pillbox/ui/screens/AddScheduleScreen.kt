@@ -78,7 +78,7 @@ class AddScheduleScreen(
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = "New Schedule",
+                    text = state.title,
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.weight(1f)
                 )

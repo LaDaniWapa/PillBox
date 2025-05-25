@@ -15,8 +15,9 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
 import com.daniela.pillbox.activity.MainActivity
-import com.daniela.pillbox.data.models.Medication
+import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.data.repository.AuthRepository
+import com.daniela.pillbox.data.repository.MedicationRepository
 import com.daniela.pillbox.receivers.AlarmReceiver
 import com.daniela.pillbox.utils.AlarmScheduler
 import com.daniela.pillbox.utils.capitalized
@@ -32,12 +33,15 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
 
+// TODO: replace variables with UIState and give a loading icon
+
 /**
  * ViewModel for the Home screen.
  */
 class HomeViewModel(
     private val authRepository: AuthRepository,
     private val alarmScheduler: AlarmScheduler,
+    private val medsRepository: MedicationRepository,
     private val ctx: Context,
 ) : ScreenModel {
     sealed class AuthState {
@@ -64,8 +68,8 @@ class HomeViewModel(
     var showMenu by mutableStateOf(false)
 
     // Medication List
-    private val _medications = mutableStateListOf<Medication>()
-    val medications: List<Medication> get() = _medications
+    private val _medications = mutableStateListOf<MedicationWithDocId>()
+    val medications: List<MedicationWithDocId> get() = _medications
     private val _checkedStates = mutableStateMapOf<String, Boolean>()
 
     // Setters
@@ -102,9 +106,10 @@ class HomeViewModel(
      * Loads the list of medications from the repository.
      */
     private fun loadMedications() {
-        // TODO: get medications from authRepository
         coroutineScope.launch {
-            _medications.addAll(generateSampleMedications())
+            _user.value?.id?.let { userId ->
+                _medications.addAll(medsRepository.getUserMedicationsForToday(userId))
+            }
         }
     }
 
@@ -129,28 +134,6 @@ class HomeViewModel(
         }
     }
 
-    /**
-     * Generates a list of sample medications for testing purposes.
-     */
-    private fun generateSampleMedications() = listOf(
-        Medication(
-            userId = "",
-            name = "Amoxicillin",
-            dosage = "500",
-            dosageUnit = "mg",
-            type = "capsule",
-            instructions = "Take with food",
-        ),
-        Medication(
-            userId = "",
-            name = "Ibuprofen",
-            dosage = "200",
-            dosageUnit = "mg",
-            type = "tablet",
-            instructions = "Take for pain",
-            stock = 10
-        )
-    )
 
     /**
      * Returns the appropriate greeting based on the current time.

@@ -1,8 +1,10 @@
 package com.daniela.pillbox.viewmodels
 
+import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
+import com.daniela.pillbox.R
 import com.daniela.pillbox.data.models.Schedule
 import com.daniela.pillbox.data.models.ScheduleWithDocId
 import com.daniela.pillbox.data.models.toSchedule
@@ -17,10 +19,11 @@ class AddScheduleViewModel(
     private val medsRepository: MedicationRepository,
     private val medicationId: String,
     private val schedulesToEdit: List<ScheduleWithDocId>?,
+    private val ctx: Context,
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    private val _uiState = mutableStateOf(AddScheduleUiState(medicationId))
+    private val _uiState = mutableStateOf(AddScheduleUiState(medicationId, ctx.getString(R.string.new_schedule)))
     val uiState: State<AddScheduleUiState> = _uiState
 
     private fun updateUiState(update: AddScheduleUiState.() -> AddScheduleUiState) {
@@ -36,6 +39,7 @@ class AddScheduleViewModel(
                     else
                         schedules,
                     asNeeded = schedules.any { it.asNeeded }
+                    , title = ctx.getString(R.string.edit_schedule)
                 )
             }
         }
@@ -154,10 +158,12 @@ class AddScheduleViewModel(
     data class AddScheduleUiState(
         val schedules: List<ScheduleWithDocId> = emptyList(),
         val asNeeded: Boolean = false,
+        val title: String = "",
     ) {
-        constructor(medicationId: String) : this(
+        constructor(medicationId: String, title: String) : this(
             schedules = listOf(ScheduleWithDocId(medicationId = medicationId)),
-            asNeeded = false
+            asNeeded = false,
+            title = title
         )
     }
 }

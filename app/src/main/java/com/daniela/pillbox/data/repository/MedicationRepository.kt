@@ -39,10 +39,35 @@ class MedicationRepository(val ctx: Context) {
         _medications.value = documents.map { it.data.withDocId(it.id) }
     }
 
+    /**
+     * Gets a specific medication by its document id
+     */
     fun getMedication(docId: String): MedicationWithDocId? {
         return _medications.value.find { it.docId == docId }
     }
 
+    suspend fun getUserMedicationsForToday(userId: String): List<MedicationWithDocId> {
+        val db = Appwrite.getDatabases(ctx)
+        // index of day of the week
+        val today = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK) - 1
+        Log.i("TAG", "getUserMedicationsForToday: today = $today")
+        var meds = emptyList<MedicationWithDocId>()
+
+        val documents = db.listDocuments(
+            databaseId = BuildConfig.DATABASE_ID,
+            collectionId = BuildConfig.MEDICATIONS_ID,
+            queries = listOf(
+                Query.equal("userId", userId),
+                Query.contains("weekDays", today)
+            ),
+            nestedType = Medication::class.java
+        ).documents
+
+        meds = documents.map { it.data.withDocId(it.id) }
+        Log.i("TAG", "getUserMedicationsForToday: meds = $meds")
+
+        return meds
+    }
     /**
      * Deletes a medication from the database and update the local medication list
      */

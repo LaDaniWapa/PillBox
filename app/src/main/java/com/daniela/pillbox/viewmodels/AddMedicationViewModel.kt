@@ -1,5 +1,6 @@
 package com.daniela.pillbox.viewmodels
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import cafe.adriel.voyager.core.model.ScreenModel
+import com.daniela.pillbox.R
 import com.daniela.pillbox.data.models.Medication
 import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.data.repository.AuthRepository
@@ -27,6 +29,7 @@ class AddMedicationViewModel(
     private val medsRepository: MedicationRepository,
     private val savedStateHandle: SavedStateHandle,
     private val medicationToEdit: MedicationWithDocId?,
+    private val ctx: Context,
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -56,6 +59,7 @@ class AddMedicationViewModel(
         private set
 
     val success = MutableStateFlow(false)
+    val title = MutableStateFlow(ctx.getString(R.string.new_medication))
 
     // Validation state
     val isFormValid: Boolean
@@ -122,6 +126,7 @@ class AddMedicationViewModel(
             savedStateHandle["instructions"] = instructions
             savedStateHandle["stock"] = stock
             savedStateHandle["notes"] = notes
+            title.value = ctx.getString(R.string.edit_medication)
         }
     }
 

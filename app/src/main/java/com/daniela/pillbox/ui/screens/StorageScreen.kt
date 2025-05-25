@@ -75,8 +75,8 @@ class StorageScreen : BaseScreen() {
         ) {
             if (state.showDeleteDialog)
                 DeleteConfirmationDialog(
-                    description = "Are you sure you want to delete this medication?",
-                    title = "Delete medication?",
+                    description = stringResource(R.string.are_you_sure_you_want_to_delete_this_medication),
+                    title = stringResource(R.string.ask_delete_medication),
                     onDismiss = vm::dismissDialog,
                     onConfirm = vm::confirmDeleteMedication
                 )

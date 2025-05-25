@@ -1,8 +1,10 @@
 package com.daniela.pillbox.viewmodels
 
+import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
+import com.daniela.pillbox.R
 import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.data.repository.MedicationRepository
@@ -15,6 +17,7 @@ import kotlinx.coroutines.launch
 class StorageViewModel(
     private val authRepository: AuthRepository,
     private val medsRepository: MedicationRepository,
+    private val ctx: Context
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -23,9 +26,7 @@ class StorageViewModel(
     val uiState: State<StorageUiState> = _uiState
 
     // Available filters
-    val filters = listOf(
-        "All", "Low Stock", "Tablets", "Liquids", "Capsules", "Injections", "Creams", "Others"
-    )
+    val filters = ctx.getString(R.string.filters).split(",")
 
     init {
         loadMedications()
@@ -72,12 +73,15 @@ class StorageViewModel(
                     _uiState.value = _uiState.value.copy(isLoading = false)
                 } ?: run {
                     _uiState.value = _uiState.value.copy(
-                        error = "User not authenticated", isLoading = false
+                        error = ctx.getString(R.string.user_not_authenticated), isLoading = false
                     )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    error = "Failed to load medications: ${e.localizedMessage}", isLoading = false
+                    error = ctx.getString(
+                        R.string.failed_to_load_medications,
+                        e.localizedMessage
+                    ), isLoading = false
                 )
             }
         }
