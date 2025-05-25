@@ -17,19 +17,19 @@
 
 1. [✨ Features](#-features)
 2. [🚀 Technologies](#-technologies)
-3. [⚡ Installation](#-installation-process)
+3. [Installation](#-installation-process)
     - 3.1 [Official Releases 🛍](#-official-release-channels)
         - [Via F-Droid](#via-f-droid)
     - 3.2 [Building from Source 📦](#-building-from-source)
-        - [Android Studio](#option-1-using-android-studio)
-        - [Command Line](#option-2-command-line-with-gradle)
+        - [Android Studio](#-option-1-using-android-studio)
+        - [Command Line](#-option-2-command-line-with-gradle)
 4. [💡 Challenges](#-challenges)
-5. [📸 Screenshots](#-screenshots--mockups)
+5. [📸 Screenshots](#-screenshots--app-flow)
 6. [🎯 Conclusion](#-wrapping-it-up)
 
 ## ✨ Features
 
-[▲ Back to top](#-table-of-contents)
+[▲ Back to top](#table-of-contents)
 
 ### 🔑 1. **User Authentication**
 
@@ -56,7 +56,7 @@
 
 ## 📝 Technologies
 
-[▲ Back to top](#-table-of-contents)
+[▲ Back to top](#table-of-contents)
 
 The app was built using:
 
@@ -67,9 +67,9 @@ The app was built using:
 - **Appwrite**: Backend-as-a-service for user authentication and database management.
 - **Git & GitHub**: Version control system to manage code changes efficiently.
 
-## ⚡️ Installation Process
+## ⚡ Installation Process
 
-[▲ Back to top](#-table-of-contents)
+[▲ Back to top](#table-of-contents)
 
 ### 🧾 Official Release Channels
 
@@ -153,9 +153,9 @@ EOF
 ./gradlew assembleRelease  # Requires signing config
 ```
 
-## Challenges 💡
+## 💡 Challenges
 
-[▲ Back to top](#-table-of-contents)
+[▲ Back to top](#table-of-contents)
 
 - **Setting up AppWrite**: Making everything work with your own server is quite complicated.
 - **MVVM**: Girl I was going crazy at first, but now I can't live without it, thanks to Koin for
@@ -167,7 +167,7 @@ EOF
 
 ## 📸 Screenshots & App Flow
 
-[▲ Back to top](#-table-of-contents)
+[▲ Back to top](#table-of-contents)
 
 <div align="center" style="width: 100%; overflow-x: auto;">
 
@@ -203,9 +203,9 @@ EOF
 
 </div>
 
-## Wrapping It Up 🎯
+## 🎯 Wrapping It Up
 
-[▲ Back to top](#-table-of-contents)
+[▲ Back to top](#table-of-contents)
 
 PillBox is like having a personal meds assistant in your pocket! 💊📱 We've packed it with all the
 smart features you may need:
