@@ -5,13 +5,16 @@
   <h1 style="margin: 0; font-size: 35px;">Enhancing Medication  with Technology</h1>
 </div>
 
-<div style="max-width: 700px;margin: 0 auto;padding: 20px;text-align: center;">
-    Developed as my capstone project, <b>PillBox</b> reimagines medication tracking with intuitive design 
-    and reliable technology. This documentation covers the development process, innovative features, 
-    technical implementation, and how to get started with the app.
 </div>
 
-</div>
+I built **PillBox** as my graduation project to solve a real headache: remembering to take meds 💊.  
+I created this app because I hate to:
+
+- Play detective with pill bottles 🔍
+- Miss doses because I forgot
+- Struggle with clunky interfaces or expensive apps
+
+Below you'll find everything from tech specs to setup guides. Happy medicating! ✨
 
 ## Table of Contents
 
