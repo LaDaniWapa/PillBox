@@ -130,9 +130,9 @@ class StorageScreen : BaseScreen() {
                         colors = SearchBarDefaults.colors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         ),
-                        windowInsets = WindowInsets(0.dp) // Remove system insets
+                        windowInsets = WindowInsets(0.dp)
                     ) {
-                        // Empty content since we're not using suggestions
+                        // Empty content since suggestions aren't being used
                     }
                 }
 

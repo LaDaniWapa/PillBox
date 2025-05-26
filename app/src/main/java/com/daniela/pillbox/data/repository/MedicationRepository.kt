@@ -8,6 +8,8 @@ import com.daniela.pillbox.data.models.Medication
 import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.data.models.Schedule
 import com.daniela.pillbox.data.models.ScheduleWithDocId
+import com.daniela.pillbox.data.models.ScheduleWithMedication
+import com.daniela.pillbox.data.models.ScheduleWithMedicationAndDocId
 import com.daniela.pillbox.data.models.withDocId
 import io.appwrite.ID
 import io.appwrite.Query
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.update
 
 /**
  * Handles Medication_db crud operations
+ * @param ctx The context of the application
  */
 class MedicationRepository(val ctx: Context) {
     private val _medications = MutableStateFlow<List<MedicationWithDocId>>(emptyList())
@@ -24,6 +27,7 @@ class MedicationRepository(val ctx: Context) {
 
     /**
      * Gets all medications for a specific user
+     * @param userId The id of the user
      */
     suspend fun getUserMedications(userId: String) {
         val db = Appwrite.getDatabases(ctx)
@@ -41,35 +45,76 @@ class MedicationRepository(val ctx: Context) {
 
     /**
      * Gets a specific medication by its document id
+     * @param docId The document id of the medication
+     * @return The medication object
      */
     fun getMedication(docId: String): MedicationWithDocId? {
         return _medications.value.find { it.docId == docId }
     }
 
-    suspend fun getUserMedicationsForToday(userId: String): List<MedicationWithDocId> {
+    /**
+     * Gets all medications for a specific user that are scheduled for today
+     * @param userId The id of the user
+     * @return A list of ScheduleWithMedicationAndDocId objects
+     */
+    suspend fun getUserMedicationsForToday(userId: String): List<ScheduleWithMedicationAndDocId> {
         val db = Appwrite.getDatabases(ctx)
-        // index of day of the week
-        val today = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK) - 1
-        Log.i("TAG", "getUserMedicationsForToday: today = $today")
-        var meds = emptyList<MedicationWithDocId>()
+        val today = (java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK) + 5) % 7
+        println("today: $today")
+
+        var scheduleWithMeds = emptyList<ScheduleWithMedicationAndDocId>()
 
         val documents = db.listDocuments(
             databaseId = BuildConfig.DATABASE_ID,
-            collectionId = BuildConfig.MEDICATIONS_ID,
+            collectionId = BuildConfig.SCHEDULES_ID,
             queries = listOf(
                 Query.equal("userId", userId),
                 Query.contains("weekDays", today)
             ),
-            nestedType = Medication::class.java
+            nestedType = ScheduleWithMedication::class.java
         ).documents
 
-        meds = documents.map { it.data.withDocId(it.id) }
-        Log.i("TAG", "getUserMedicationsForToday: meds = $meds")
+        scheduleWithMeds = flattenSchedules(documents.map { it.data.withDocId(it.id) })
+        println("scheduleWithMeds: $scheduleWithMeds")
 
-        return meds
+        return scheduleWithMeds
     }
+
+    /**
+     * Flattens a list of ScheduleWithMedicationAndDocId objects
+     * @param schedules The list of ScheduleWithMedicationAndDocId objects to flatten
+     * @return A list of ScheduleWithMedicationAndDocId objects
+     */
+    private fun flattenSchedules(schedules: List<ScheduleWithMedicationAndDocId>): List<ScheduleWithMedicationAndDocId> {
+        val flattened = mutableListOf<ScheduleWithMedicationAndDocId>()
+        for (schedule in schedules) {
+            schedule.times?.let { times ->
+                schedule.amounts?.let { amounts ->
+                    val zip = times.zip(amounts)
+                    zip.forEach { (time, amount) ->
+                        flattened.add(
+                            ScheduleWithMedicationAndDocId(
+                                docId = schedule.docId,
+                                medicationId = schedule.medicationId,
+                                userId = schedule.userId,
+                                weekDays = schedule.weekDays,
+                                times = listOf(time),
+                                amounts = listOf(amount),
+                                asNeeded = schedule.asNeeded,
+                                medicationObj = schedule.medicationObj
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        return flattened
+    }
+
     /**
      * Deletes a medication from the database and update the local medication list
+     * @param docId The document id of the medication
      */
     suspend fun deleteUserMedication(docId: String) {
         val db = Appwrite.getDatabases(ctx)
@@ -90,6 +135,7 @@ class MedicationRepository(val ctx: Context) {
 
     /**
      * Adds a medication to the database and update the local medication list
+     * @param medication The medication object to add
      */
     suspend fun addUserMedication(medication: Medication) {
         val db = Appwrite.getDatabases(ctx)
@@ -111,6 +157,8 @@ class MedicationRepository(val ctx: Context) {
 
     /**
      * Updates a medication in the database and update the local medication list
+     * @param medication The medication object to update
+     * @param docId The document id of the medication
      */
     suspend fun updateUserMedication(medication: Medication, docId: String) {
         val db = Appwrite.getDatabases(ctx)
@@ -140,6 +188,8 @@ class MedicationRepository(val ctx: Context) {
 
     /**
      * Adds a schedule to the database
+     * @param schedule The schedule object to add
+     * @return The schedule object with the document id
      */
     suspend fun addMedicationSchedule(schedule: Schedule): ScheduleWithDocId {
         var res: Any? = null
@@ -155,7 +205,6 @@ class MedicationRepository(val ctx: Context) {
             )
 
             Log.i("TAG", "addMedicationSchedule: $res, $schedule")
-
         } catch (e: Exception) {
             Log.e("TAG", "deleteUserMedication: $e")
         }
@@ -165,6 +214,8 @@ class MedicationRepository(val ctx: Context) {
 
     /**
      * Deletes a schedule from the database
+     * @param docId The document id of the schedule
+     * @return True if the schedule was deleted, false otherwise
      */
     suspend fun deleteMedicationSchedule(docId: String): Boolean {
         var res: Any? = null
@@ -186,6 +237,8 @@ class MedicationRepository(val ctx: Context) {
 
     /**
      * Updates a schedule in the database
+     * @param schedule The schedule object to update
+     * @param docId The document id of the schedule
      */
     suspend fun updateMedicationSchedule(schedule: Schedule, docId: String) {
         var res: Any? = null
@@ -207,6 +260,8 @@ class MedicationRepository(val ctx: Context) {
 
     /**
      * Gets all schedules for a specific medication
+     * @param medicationId The id of the medication
+     * @return A list of ScheduleWithDocId objects
      */
     suspend fun getMedicationSchedules(medicationId: String): List<ScheduleWithDocId> {
         val db = Appwrite.getDatabases(ctx)

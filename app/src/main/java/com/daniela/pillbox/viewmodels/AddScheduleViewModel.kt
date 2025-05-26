@@ -23,7 +23,8 @@ class AddScheduleViewModel(
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    private val _uiState = mutableStateOf(AddScheduleUiState(medicationId, ctx.getString(R.string.new_schedule)))
+    private val _uiState =
+        mutableStateOf(AddScheduleUiState(medicationId, ctx.getString(R.string.new_schedule)))
     val uiState: State<AddScheduleUiState> = _uiState
 
     private fun updateUiState(update: AddScheduleUiState.() -> AddScheduleUiState) {
@@ -38,13 +39,16 @@ class AddScheduleViewModel(
                         listOf(ScheduleWithDocId(medicationId = medicationId))
                     else
                         schedules,
-                    asNeeded = schedules.any { it.asNeeded }
-                    , title = ctx.getString(R.string.edit_schedule)
+                    asNeeded = schedules.any { it.asNeeded },
+                    title = ctx.getString(R.string.edit_schedule)
                 )
             }
         }
     }
 
+    /**
+     * Toggles the "as needed" flag.
+     */
     fun toggleAsNeeded() {
         updateUiState {
             copy(
@@ -71,6 +75,10 @@ class AddScheduleViewModel(
         }
     }
 
+    /**
+     * Updates a schedule in the list.
+     * todo: algunos no se actualizan correctamente
+     */
     fun updateSchedule(index: Int, schedule: ScheduleWithDocId) {
         val updatedSchedules = _uiState.value.schedules.toMutableList().apply {
             set(index, schedule)
@@ -78,6 +86,10 @@ class AddScheduleViewModel(
         updateUiState { copy(schedules = updatedSchedules) }
     }
 
+    /**
+     * Removes a schedule from the list.
+     * @param index The index of the schedule to remove.
+     */
     fun removeSchedule(index: Int) {
         val scheduleToRemove = _uiState.value.schedules[index]
         val updatedSchedules = _uiState.value.schedules.toMutableList().apply {
@@ -101,12 +113,18 @@ class AddScheduleViewModel(
         }
     }
 
+    /**
+     * Adds a new schedule to the list.
+     */
     fun addSchedule() {
         val updatedSchedules =
             _uiState.value.schedules + ScheduleWithDocId(medicationId = medicationId)
         updateUiState { copy(schedules = updatedSchedules) }
     }
 
+    /**
+     * Saves the schedule to the database.
+     */
     fun saveSchedule() {
         coroutineScope.launch {
             // Process all schedules
@@ -150,11 +168,17 @@ class AddScheduleViewModel(
         }
     }
 
+    /**
+     * Called when the ViewModel is no longer used and will be destroyed.
+     */
     override fun onDispose() {
         super.onDispose()
         coroutineScope.cancel()
     }
 
+    /**
+     * Data class representing the UI state for adding a schedule.
+     */
     data class AddScheduleUiState(
         val schedules: List<ScheduleWithDocId> = emptyList(),
         val asNeeded: Boolean = false,
