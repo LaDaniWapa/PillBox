@@ -131,8 +131,8 @@ data class ScheduleWithMedication(
     override val amounts: List<Int>? = listOf(1),
     override val asNeeded: Boolean = false,
     override val medicationId: String = "",
-    val medicationObj: Medication? = null
-): BaseSchedule, Serializable
+    val medicationObj: Medication? = null,
+) : BaseSchedule, Serializable
 
 data class ScheduleWithMedicationAndDocId(
     val docId: String? = null,
@@ -142,8 +142,8 @@ data class ScheduleWithMedicationAndDocId(
     override val amounts: List<Int>? = listOf(1),
     override val asNeeded: Boolean = false,
     override val medicationId: String = "",
-    val medicationObj: Medication? = null
-): BaseSchedule, Serializable
+    val medicationObj: Medication? = null,
+) : BaseSchedule, Serializable
 
 /**
  * Adds a document ID to a Schedule object.
@@ -178,10 +178,52 @@ fun ScheduleWithDocId.toSchedule() = Schedule(
  */
 fun ScheduleWithMedication.withDocId(docId: String) = ScheduleWithMedicationAndDocId(
     docId = docId,
+    userId = this.userId,
     weekDays = this.weekDays,
     times = this.times,
     amounts = this.amounts,
     asNeeded = this.asNeeded,
     medicationId = this.medicationId,
     medicationObj = this.medicationObj
+)
+
+/**
+ * Interface for intake objects.
+ */
+interface BaseIntake {
+    val userId: String
+    val scheduleId: String
+    val time: String
+    val date: String
+}
+
+/**
+ * Intake object.
+ */
+data class Intake(
+    override val userId: String,
+    override val scheduleId: String,
+    override val time: String,
+    override val date: String,
+) : BaseIntake, Serializable
+
+data class IntakeWithDocId(
+    val docId: String? = null,
+    override val userId: String,
+    override val scheduleId: String,
+    override val time: String,
+    override val date: String,
+) : BaseIntake, Serializable
+
+/**
+ * Adds a document ID to an Intake object.
+ * @param docId The document ID to add.
+ * @return A new Intake object with the document ID added.
+ */
+fun Intake.withDocId(docId: String) = IntakeWithDocId(
+    docId = docId,
+    userId = this.userId,
+    scheduleId = this.scheduleId,
+    time = this.time,
+    date = this.date
 )

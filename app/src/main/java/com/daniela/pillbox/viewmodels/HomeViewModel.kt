@@ -12,12 +12,14 @@ import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
 import com.daniela.pillbox.activity.MainActivity
+import com.daniela.pillbox.data.models.IntakeWithDocId
 import com.daniela.pillbox.data.models.ScheduleWithMedicationAndDocId
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.data.repository.MedicationRepository
 import com.daniela.pillbox.receivers.AlarmReceiver
 import com.daniela.pillbox.utils.AlarmScheduler
 import com.daniela.pillbox.utils.capitalized
+import io.appwrite.exceptions.AppwriteException
 import io.appwrite.models.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +40,7 @@ class HomeViewModel(
 ) : ScreenModel {
     // Coroutine
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var intakes: List<IntakeWithDocId> = emptyList()
 
     private val _uiState = mutableStateOf(HomeUiState())
     val uiState: State<HomeUiState> = _uiState
@@ -55,25 +58,50 @@ class HomeViewModel(
      * Checks the authentication state of the user.
      */
     private fun checkAuthState() {
-        updateUiState { copy(authSate = AuthState.Loading) }
+        updateUiState { copy(authState = AuthState.Loading) }
 
         coroutineScope.launch {
             try {
-                authRepository.getLoggedInUser()?.let { user ->
+                val user = authRepository.getLoggedInUser()
+                user?.let { user ->
                     updateUiState {
                         copy(
-                            authSate = AuthState.Authenticated(user),
+                            authState = AuthState.Authenticated(user),
                             user = user,
                         )
                     }
 
                     // Load meds after auth, otherwise the medication list is empty
                     loadMedications()
+                    getUserIntakes(user.id)
+                } ?: run {
+                    updateUiState { copy(authState = AuthState.Unauthenticated) }
+                }
+            } catch (e: AppwriteException) {
+                when {
+                    // Handle missing account scope specifically
+                    e.message?.contains("missing scope (account)") == true -> {
+                        updateUiState {
+                            copy(authState = AuthState.Error("Please sign in again"))
+                        }
+                        // Optional: Trigger logout flow
+                        authRepository.logout()
+                    }
+                    // Handle other Appwrite errors
+                    else -> {
+                        updateUiState {
+                            copy(
+                                authState = AuthState.Error(
+                                    e.message ?: "Authentication error"
+                                )
+                            )
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 updateUiState {
                     copy(
-                        authSate = AuthState.Error(e.message ?: "Unknown error")
+                        authState = AuthState.Error(e.message ?: "Unknown error")
                     )
                 }
             }
@@ -86,9 +114,8 @@ class HomeViewModel(
     private fun loadMedications() {
         coroutineScope.launch {
             try {
-                when (val currentAuth = _uiState.value.authSate) {
+                when (val currentAuth = _uiState.value.authState) {
                     is AuthState.Authenticated -> {
-
                         val meds = _uiState.value.user?.id?.let { userId ->
                             medsRepository.getUserMedicationsForToday(userId)
                         }
@@ -96,9 +123,14 @@ class HomeViewModel(
                         updateUiState {
                             copy(
                                 schedulesWithMedications = meds ?: emptyList(),
-                                checkedStates = meds?.associate { it.docId!! to false }
+                                checkedStates = meds?.associate {
+                                    Pair(
+                                        it.docId!!,
+                                        it.times?.get(0)!!
+                                    ) to false
+                                }
                                     ?: emptyMap(),
-                                authSate = AuthState.Authenticated(currentAuth.user)
+                                authState = AuthState.Authenticated(currentAuth.user)
                             )
                         }
                     }
@@ -109,7 +141,7 @@ class HomeViewModel(
                 Log.e("TAG", "loadMedications: $e")
                 updateUiState {
                     copy(
-                        authSate = AuthState.Error(e.message ?: "Unknown error")
+                        authState = AuthState.Error(e.message ?: "Unknown error")
                     )
                 }
             }
@@ -133,15 +165,14 @@ class HomeViewModel(
      * @return The display name of the current user.
      */
     private fun getDisplayName(): String {
-        val currentUser = _uiState.value.user ?: return "User" // Early return if null
+        val currentUser = _uiState.value.user ?: return "User"
 
         return when {
             currentUser.name.isNotEmpty() -> currentUser.name.capitalized()
             currentUser.email.isNotEmpty() -> currentUser.email.substringBefore("@").capitalized()
-            else -> "User" // Fallback
+            else -> "User"
         }
     }
-
 
     /**
      * Logs out the current user and sets the loggedOut flag to true.
@@ -149,7 +180,7 @@ class HomeViewModel(
     fun logout() {
         coroutineScope.launch {
             authRepository.logout()
-            updateUiState { copy(authSate = AuthState.Unauthenticated) }
+            updateUiState { copy(authState = AuthState.Unauthenticated) }
         }
     }
 
@@ -161,23 +192,85 @@ class HomeViewModel(
     }
 
     /**
-     * Checks if the medication with the given ID has been taken.
+     * Retrieves the marked medications for the user.
+     * @param userId The ID of the user.
+     */
+    fun getUserIntakes(userId: String) {
+        coroutineScope.launch {
+            var oldCheckStatus = _uiState.value.checkedStates.toMutableMap()
+            medsRepository.getMarkedMedications(userId).forEach { intake ->
+                oldCheckStatus[intake.scheduleId to intake.time] = true
+            }
+            updateUiState { copy(checkedStates = oldCheckStatus) }
+        }
+    }
+
+    /**
+     * Checks if the specific medication instance (schedule + time) has been taken.
      * @param id The ID of the medication.
      * @return True if the medication has been taken, false otherwise.
      */
-    fun isMedicationTaken(id: String) = _uiState.value.checkedStates[id] == true
+    fun isMedicationTaken(id: String, time: String): Boolean {
+        return _uiState.value.checkedStates.get(id to time) == true
+    }
 
     /**
-     * Toggles the checked state of the medication with the given ID.
-     * @param id The ID of the medication.
+     * Toggles the checked state of the medication with the given schedule and time.
+     * @param med The medication schedule to toggle, must have valid docId and at least one time
+     * @throws IllegalArgumentException if med.docId or med.times is null/empty
      */
-    fun toggleMedicationChecked(id: String) {
-        updateUiState {
-            copy(
-                checkedStates = checkedStates.toMutableMap().apply {
-                    put(id, checkedStates[id] != true)
+    fun toggleMedicationChecked(
+        med: ScheduleWithMedicationAndDocId,
+    ) {
+        val id = med.docId ?: run {
+            Log.e("MedicationToggle", "Missing document ID for medication")
+            return
+        }
+        val time = med.times?.firstOrNull() ?: run {
+            Log.e("MedicationToggle", "No times available for medication $id")
+            return
+        }
+
+        coroutineScope.launch {
+            val newCheckedState = !isMedicationTaken(id, time)
+
+            try {
+                // Optimistic UI update
+                updateUiState {
+                    copy(
+                        checkedStates = checkedStates.toMutableMap().apply {
+                            put(id to time, newCheckedState)
+                        }
+                    )
                 }
-            )
+
+                // Perform repository operation
+                if (newCheckedState) {
+                    medsRepository.markMedicationAsTaken(med)
+                } else {
+                    medsRepository.markMedicationAsNOTTaken(med)
+                }
+
+                Log.d(
+                    "MedicationToggle",
+                    "Successfully ${if (newCheckedState) "marked" else "unmarked"} medication $id at $time"
+                )
+
+            } catch (e: Exception) {
+                Log.e(
+                    "MedicationToggle",
+                    "Failed to toggle medication $id at $time: ${e.message}", e
+                )
+
+                // Revert UI state on failure
+                updateUiState {
+                    copy(
+                        checkedStates = checkedStates.toMutableMap().apply {
+                            put(id to time, !newCheckedState)
+                        }
+                    )
+                }
+            }
         }
     }
 
@@ -197,7 +290,7 @@ class HomeViewModel(
         }
     }
 
-    // Testing func
+    /* Testing func*/
     fun testAlarmSystem() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = ctx.getSystemService(AlarmManager::class.java)
@@ -213,7 +306,7 @@ class HomeViewModel(
             .show()
     }
 
-    // Testing func
+    /* Testing func*/
     fun sendAlarm() {
         coroutineScope.launch {
             println("⏳ Starting alarm test...")
@@ -225,45 +318,81 @@ class HomeViewModel(
 
             activity.checkAndRequestPermissions(
                 action = {
-                    // Generate unique request code each time
-                    val requestCode = System.currentTimeMillis().toInt()
-                    val alarmTime =
-                        Calendar.getInstance().apply { add(Calendar.SECOND, 10) }.timeInMillis
+                    try {
+                        Log.d("AlarmTest", "Executing alarm scheduling action lambda.")
+                        // Generate unique request code each time
+                        val requestCode = System.currentTimeMillis().toInt()
+                        val alarmTime =
+                            Calendar.getInstance().apply { add(Calendar.SECOND, 10) }.timeInMillis
 
-                    println("⏰ Scheduling test alarm #$requestCode for ${Date(alarmTime)}")
+                        println("⏰ Scheduling test alarm #$requestCode for ${Date(alarmTime)}")
 
-                    val intent = Intent(ctx, AlarmReceiver::class.java).apply {
-                        action = "com.daniela.pillbox.TEST_ALARM_$requestCode" // Unique action
-                        putExtra("test_alarm", true)
-                        putExtra("request_code", requestCode)
-                    }
+                        // Defensive check for ctx (though less likely to be the issue if passed via Koin/constructor)
+                        if (ctx == null) {
+                            Log.e("AlarmTest", "Context (ctx) is null before creating Intent!")
+                            return@checkAndRequestPermissions // or throw an exception to see it clearly
+                        }
 
-                    val pendingIntent = PendingIntent.getBroadcast(
-                        ctx,
-                        requestCode,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
+                        val intent = Intent(ctx, AlarmReceiver::class.java).apply {
+                            action = "com.daniela.pillbox.TEST_ALARM_$requestCode" // Unique action
+                            putExtra("test_alarm", true)
+                            putExtra("request_code", requestCode)
+                        }
 
-                    ctx.getSystemService(AlarmManager::class.java).apply {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            if (canScheduleExactAlarms()) {
-                                setExactAndAllowWhileIdle(
+                        val pendingIntent = PendingIntent.getBroadcast(
+                            ctx,
+                            requestCode,
+                            intent,
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        )
+
+                        val alarmManagerService = ctx.getSystemService(AlarmManager::class.java)
+                        if (alarmManagerService == null) {
+                            Log.e("AlarmTest", "AlarmManager service is null!")
+                            return@checkAndRequestPermissions
+                        }
+
+                        alarmManagerService.apply {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                if (canScheduleExactAlarms()) {
+                                    Log.d("AlarmTest", "Setting exact alarm (SDK >= S)")
+                                    setExactAndAllowWhileIdle(
+                                        AlarmManager.RTC_WAKEUP,
+                                        alarmTime,
+                                        pendingIntent
+                                    )
+                                } else {
+                                    Log.w(
+                                        "AlarmTest",
+                                        "Cannot schedule exact alarms (SDK >= S), though initial check passed or was skipped."
+                                    )
+                                }
+                            } else {
+                                Log.d("AlarmTest", "Setting exact alarm (SDK < S)")
+                                setExact(
                                     AlarmManager.RTC_WAKEUP,
                                     alarmTime,
                                     pendingIntent
                                 )
                             }
-                        } else {
-                            setExact(
-                                AlarmManager.RTC_WAKEUP,
-                                alarmTime,
-                                pendingIntent
-                            )
                         }
-                    }
 
-                    Toast.makeText(ctx, "Alarm #$requestCode scheduled", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(ctx, "Alarm #$requestCode scheduled", Toast.LENGTH_SHORT)
+                            .show()
+                        Log.d(
+                            "AlarmTest",
+                            "Alarm successfully scheduled in action lambda."
+                        ) // <--- ADD LOG
+
+                    } catch (e: Exception) { // <--- ADD CATCH
+                        Log.e("AlarmTest", "CRASH INSIDE `sendAlarm`'s action lambda!", e)
+                        // Optionally, re-show a toast or provide feedback to the user here
+                        Toast.makeText(
+                            ctx,
+                            "Failed to schedule test alarm: ${e.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 },
                 onDenied = {
                     println("🔒 Permissions not granted")
@@ -295,10 +424,10 @@ class HomeViewModel(
      * Represents the UI state for the Home screen.
      */
     data class HomeUiState(
-        val authSate: AuthState = AuthState.Loading,
+        val authState: AuthState = AuthState.Loading,
         val user: User<Map<String, Any>>? = null,
         val showMenu: Boolean = false,
         val schedulesWithMedications: List<ScheduleWithMedicationAndDocId> = emptyList(),
-        val checkedStates: Map<String, Boolean> = emptyMap(),
+        val checkedStates: Map<Pair<String, String>, Boolean> = emptyMap(),
     )
 }

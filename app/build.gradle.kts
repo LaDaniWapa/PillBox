@@ -68,6 +68,11 @@ android {
             "SCHEDULES_ID",
             "\"${secrets.getProperty("APPWRITE_SCHEDULES_ID", "")}\""
         )
+        buildConfigField(
+            "String",
+            "INTAKES_ID",
+            "\"${secrets.getProperty("APPWRITE_INTAKES_ID", "")}\""
+        )
 
         applicationId = "com.daniela.pillbox"
         minSdk = 29

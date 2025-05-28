@@ -71,7 +71,7 @@ class HomeScreen : BaseScreen() {
         val vm = rememberVoyagerScreenModel<HomeViewModel>()
         val state by vm.uiState
 
-        when (val authState = state.authSate) {
+        when (val authState = state.authState) {
             is AuthState.Loading -> FullScreenLoader()
             is AuthState.Authenticated -> MainContent(vm, navigator, state)
             is AuthState.Unauthenticated -> navigator.replaceAll(LoginScreen())
@@ -232,9 +232,8 @@ class HomeScreen : BaseScreen() {
             items(state.schedulesWithMedications) { med ->
                 NewMedicationItem(
                     scheduleWithMedication = med,
-                    isChecked = vm.isMedicationTaken(med.docId!!),
-                    onCheckedChange = { vm.toggleMedicationChecked(med.docId) }
-
+                    isChecked = vm.isMedicationTaken(med.docId!!, med.times?.get(0)!!),
+                    onCheckedChange = { vm.toggleMedicationChecked(med) }
                 )
             }
         }
@@ -325,9 +324,21 @@ private fun NewMedicationItem(
                     .weight(1f)
                     .padding(horizontal = 8.dp)
             ) {
-                // Main info
+                // Name
                 Text(
                     text = scheduleWithMedication.medicationObj?.name ?: "Unknown Medication",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Name
+                Text(
+                    text = scheduleWithMedication.userId ?: "null",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     ),

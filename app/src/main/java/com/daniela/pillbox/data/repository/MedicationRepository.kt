@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.daniela.pillbox.Appwrite
 import com.daniela.pillbox.BuildConfig
+import com.daniela.pillbox.data.models.Intake
+import com.daniela.pillbox.data.models.IntakeWithDocId
 import com.daniela.pillbox.data.models.Medication
 import com.daniela.pillbox.data.models.MedicationWithDocId
 import com.daniela.pillbox.data.models.Schedule
@@ -16,6 +18,8 @@ import io.appwrite.Query
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 /**
  * Handles Medication_db crud operations
@@ -60,9 +64,6 @@ class MedicationRepository(val ctx: Context) {
     suspend fun getUserMedicationsForToday(userId: String): List<ScheduleWithMedicationAndDocId> {
         val db = Appwrite.getDatabases(ctx)
         val today = (java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK) + 5) % 7
-        println("today: $today")
-
-        var scheduleWithMeds = emptyList<ScheduleWithMedicationAndDocId>()
 
         val documents = db.listDocuments(
             databaseId = BuildConfig.DATABASE_ID,
@@ -74,10 +75,7 @@ class MedicationRepository(val ctx: Context) {
             nestedType = ScheduleWithMedication::class.java
         ).documents
 
-        scheduleWithMeds = flattenSchedules(documents.map { it.data.withDocId(it.id) })
-        println("scheduleWithMeds: $scheduleWithMeds")
-
-        return scheduleWithMeds
+        return flattenSchedules(documents.map { it.data.withDocId(it.id) })
     }
 
     /**
@@ -239,6 +237,7 @@ class MedicationRepository(val ctx: Context) {
      * Updates a schedule in the database
      * @param schedule The schedule object to update
      * @param docId The document id of the schedule
+     * @throws Exception if there's an error updating the schedule
      */
     suspend fun updateMedicationSchedule(schedule: Schedule, docId: String) {
         var res: Any? = null
@@ -262,6 +261,7 @@ class MedicationRepository(val ctx: Context) {
      * Gets all schedules for a specific medication
      * @param medicationId The id of the medication
      * @return A list of ScheduleWithDocId objects
+     * @throws io.appwrite.exceptions.AppwriteException if there's an error fetching data
      */
     suspend fun getMedicationSchedules(medicationId: String): List<ScheduleWithDocId> {
         val db = Appwrite.getDatabases(ctx)
@@ -275,5 +275,119 @@ class MedicationRepository(val ctx: Context) {
         ).documents
 
         return documents.map { it.data.withDocId(it.id) }
+    }
+
+    /**
+     * Retrieves all medications marked as taken for the current user today.
+     * @param userId The ID of the current user
+     * @return List of [Intake] records for today
+     * @throws io.appwrite.exceptions.AppwriteException if there's an error fetching data
+     */
+    suspend fun getMarkedMedications(userId: String): List<IntakeWithDocId> {
+        require(userId.isNotEmpty()) { "User ID cannot be empty" }
+
+        val db = Appwrite.getDatabases(ctx)
+        val today = LocalDateTime.now().toLocalDate()
+
+        val documents = db.listDocuments(
+            databaseId = BuildConfig.DATABASE_ID,
+            collectionId = BuildConfig.INTAKES_ID,
+            queries = listOf(
+                Query.equal("userId", userId),
+                Query.equal("date", today.toString())
+            ),
+            nestedType = Intake::class.java
+        ).documents
+
+        return documents.map { it.data.withDocId(it.id) }
+    }
+
+    /**
+     * Marks a medication as taken by creating an intake record.
+     * @param info The schedule and medication information to mark as taken
+     * @throws IllegalArgumentException if required fields are missing
+     * @throws io.appwrite.exceptions.AppwriteException if there's an error creating the record
+     */
+    suspend fun markMedicationAsTaken(info: ScheduleWithMedicationAndDocId) {
+        require(info.docId != null) { "Schedule document ID cannot be null" }
+        require(info.userId != null) { "User ID cannot be null" }
+        require(!info.times.isNullOrEmpty()) { "Time must be specified" }
+        val db = Appwrite.getDatabases(ctx)
+
+        try {
+            val intake = Intake(
+                date = LocalDate.now().toString(),
+                scheduleId = info.docId,
+                userId = info.userId,
+                time = info.times.first(),
+            )
+
+            db.createDocument(
+                databaseId = BuildConfig.DATABASE_ID,
+                collectionId = BuildConfig.INTAKES_ID,
+                documentId = ID.unique(),
+                data = intake,
+                nestedType = Intake::class.java
+            )
+        } catch (e: Exception) {
+            Log.e("MedicationIntake", "Error marking medication as taken", e)
+            throw e
+        }
+    }
+
+    /**
+     * Marks a medication as NOT taken by deleting the corresponding intake record.
+     * @param info The schedule and medication information to unmark
+     * @throws IllegalArgumentException if required fields are missing
+     * @throws io.appwrite.exceptions.AppwriteException if there's an error deleting the record
+     */
+    suspend fun markMedicationAsNOTTaken(info: ScheduleWithMedicationAndDocId) {
+        require(info.docId != null) { "Schedule document ID cannot be null" }
+        require(info.userId != null) { "User ID cannot be null" }
+        require(!info.times.isNullOrEmpty()) { "Time must be specified" }
+        val db = Appwrite.getDatabases(ctx)
+
+        try {
+            val intake = getIntakeRecord(info)
+            intake?.docId?.let { documentId ->
+                db.deleteDocument(
+                    databaseId = BuildConfig.DATABASE_ID,
+                    collectionId = BuildConfig.INTAKES_ID,
+                    documentId = documentId
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("MedicationIntake", "Error unmarking medication", e)
+            throw e
+        }
+    }
+
+    /**
+     * Retrieves the intake record for a specific medication schedule instance.
+     * @param info The schedule and medication information to lookup
+     * @return The [IntakeWithDocId] record if found, null otherwise
+     */
+    suspend fun getIntakeRecord(info: ScheduleWithMedicationAndDocId): IntakeWithDocId? {
+        //TODO FIX THIS TOO??
+        println("GET INTAKES")
+        require(info.docId != null) { "Schedule document ID cannot be null" }
+        require(info.userId != null) { "User ID cannot be null" }
+        require(!info.times.isNullOrEmpty()) { "Time must be specified" }
+        val db = Appwrite.getDatabases(ctx)
+
+        val documents = db.listDocuments(
+            databaseId = BuildConfig.DATABASE_ID,
+            collectionId = BuildConfig.INTAKES_ID,
+            queries = listOf(
+                Query.equal("scheduleId", info.docId),
+                Query.equal("userId", info.userId),
+                Query.equal("time", info.times.first())
+            ),
+            //nestedType = Intake::class.java
+        ).documents.forEach {
+            println(it)
+        }
+
+        return null
     }
 }
