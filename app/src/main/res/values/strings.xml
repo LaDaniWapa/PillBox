@@ -95,4 +95,23 @@
     <string name="edit_medication">Edit Medication</string>
     <string name="new_schedule">New Schedule</string>
     <string name="edit_schedule">Edit Schedule</string>
+    <string name="time_to_take_your_medication">Time to take your medication!</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="try_again">Try Again</string>
+    <string name="api_search">CIMA Search</string>
+    <string name="api_details">CIMA Details</string>
+
+    <string name="registration_number">Registration Number</string>
+    <string name="active_ingredients">Active Ingredients</string>
+    <string name="active_principles">Active Principles</string>
+
+    <string name="affects_driving">Affects Driving</string>
+    <string name="supply_problems">Supply Problems</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="principle_amount">Amount: %1$s%2$s</string>
+    <string name="view_document">View Document</string>
+    <string name="unknown_medication">Unknown Medication</string>
+    <string name="retry">Retry</string>
+    <string name="error">Error</string>
 </resources>

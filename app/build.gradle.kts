@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("org.jetbrains.dokka") version "1.9.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
 }
 
 tasks.named<DokkaTask>("dokkaHtml").configure {
@@ -126,6 +127,15 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.core)
+
+    // Ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+
+    // Serialization
+    implementation(libs.kotlinx.serialization.json)
 
     // Material3
     implementation(libs.androidx.material3)

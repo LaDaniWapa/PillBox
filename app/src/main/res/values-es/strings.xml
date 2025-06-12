@@ -46,7 +46,7 @@
     <string name="notes">Notas</string>
     <string name="save_medication">Guardar Medicamento</string>
     <string name="medication_storage">Almacenamiento</string>
-    <string name="search_medications">Buscar medicamentos...</string>
+    <string name="search_medications">Buscar medicamentos…</string>
     <string name="clear">Limpiar</string>
     <string name="there_was_an_error">Hubo un error</string>
     <string name="no_medications_found">No se han encontrado medicamentos</string>
@@ -85,12 +85,31 @@
     <string name="remove_time">Eliminar hora</string>
     <string name="add_another_time">Añadir Otra Hora</string>
     <string name="remove_this_pattern">Eliminar Este Horario</string>
-    <string name="are_you_sure_you_want_to_delete_this_medication">Are you sure you want to delete this medication?</string>
-    <string name="ask_delete_medication">Delete medication?</string>
-    <string name="user_not_authenticated">User not authenticated</string>
-    <string name="failed_to_load_medications">Failed to load medications: %1$s</string>
-    <string name="filters">All,Low Stock,Tablets,Liquids,Capsules,Injections,Creams,Others</string>
-    <string name="edit_medication">Edit Medication</string>
-    <string name="new_schedule">New Schedule</string>
-    <string name="edit_schedule">Edit Schedule</string>
+    <string name="are_you_sure_you_want_to_delete_this_medication">¿Estás seguro de que quieres eliminar este medicamento?</string>
+    <string name="ask_delete_medication">¿Eliminar medicamento?</string>
+    <string name="user_not_authenticated">Usuario no autenticado</string>
+    <string name="failed_to_load_medications">Error al cargar medicamentos: %1$s</string>
+    <string name="filters">Todos,Bajo stock,Tabletas,Líquidos,Cápsulas,Inyecciones,Cremas,Otros</string>
+    <string name="edit_medication">Editar medicamento</string>
+    <string name="new_schedule">Nuevo horario</string>
+    <string name="edit_schedule">Editar horario</string>
+    <string name="time_to_take_your_medication">¡Hora de tomar tu medicamento!</string>
+    <string name="something_went_wrong">Algo salió mal</string>
+    <string name="try_again">Intentar de nuevo</string>
+    <string name="api_search">Búsqueda CIMA</string>
+    <string name="api_details">Detalles CIMA</string>
+
+    <string name="registration_number">Numero de registro</string>
+    <string name="active_ingredients">Ingredientes Activos</string>
+    <string name="active_principles">Principios Activos</string>
+
+    <string name="affects_driving">Afecta la Conducción</string>
+    <string name="supply_problems">Problemas de Suministros</string>
+    <string name="yes">Si</string>
+    <string name="no">No</string>
+    <string name="principle_amount">Amount: %1$s%2$s</string>
+    <string name="view_document">Ver Documento</string>
+    <string name="unknown_medication">Unknown Medication</string>
+    <string name="retry">Retry</string>
+    <string name="error">Error</string>
 </resources>
