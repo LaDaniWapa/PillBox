@@ -23,10 +23,14 @@ class AddScheduleViewModel(
 ) : ScreenModel {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
+    // UiState
     private val _uiState =
         mutableStateOf(AddScheduleUiState(medicationId, ctx.getString(R.string.new_schedule)))
     val uiState: State<AddScheduleUiState> = _uiState
 
+    /**
+     * Updates the UI state.
+     */
     private fun updateUiState(update: AddScheduleUiState.() -> AddScheduleUiState) {
         _uiState.value = _uiState.value.update()
     }

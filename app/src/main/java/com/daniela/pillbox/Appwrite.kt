@@ -38,18 +38,4 @@ object Appwrite {
             return dbs!!
         }
     }
-
-    suspend fun <T> Databases.getDocumentCustom(
-        databaseId: String,
-        collectionId: String,
-        documentId: String,
-        parser: (Map<String, Any>) -> T
-    ): T {
-        val document = this.getDocument(
-            databaseId,
-            collectionId,
-            documentId
-        )
-        return parser(document.data)
-    }
 }

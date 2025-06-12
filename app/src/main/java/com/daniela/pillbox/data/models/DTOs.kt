@@ -1,5 +1,6 @@
 package com.daniela.pillbox.data.models
 
+import kotlinx.serialization.SerialName
 import java.io.Serializable
 
 // Objects for transferring data
@@ -207,6 +208,9 @@ data class Intake(
     override val date: String,
 ) : BaseIntake, Serializable
 
+/**
+ * Intake object with a document ID.
+ */
 data class IntakeWithDocId(
     val docId: String? = null,
     override val userId: String,
@@ -226,4 +230,42 @@ fun Intake.withDocId(docId: String) = IntakeWithDocId(
     scheduleId = this.scheduleId,
     time = this.time,
     date = this.date
+)
+
+@kotlinx.serialization.Serializable
+data class ActiveIngridient(
+    @SerialName("nombre") var name: String? = null,
+    @SerialName("cantidad") var amount: String? = null,
+    @SerialName("unidad") var unit: String? = null,
+)
+
+@kotlinx.serialization.Serializable
+data class Note(
+    @SerialName("referencia") var referencia: String? = null,
+    @SerialName("asunto") var asunto: String? = null,
+    @SerialName("url") var url: String? = null,
+)
+
+@kotlinx.serialization.Serializable
+data class ApiMedication(
+    @SerialName("nregistro") val registrationNumber: String,
+    @SerialName("nombre") val name: String,
+)
+
+@kotlinx.serialization.Serializable
+data class ApiMedicationDetails(
+    @SerialName("nregistro") val registrationNumber: String,
+    @SerialName("nombre") val name: String,
+    @SerialName("conduc") val drivingProblems: Boolean?,
+    @SerialName("psum") val supplyProblem: Boolean?,
+    @SerialName("notas") val hasNotes: Boolean?,
+    @SerialName("principiosActivos") val activePrinciples: List<ActiveIngridient>?,
+)
+
+@kotlinx.serialization.Serializable
+data class MedicationSearchResponse(
+    @SerialName("totalFilas") val rowAmount: Int,
+    @SerialName("pagina") val pages: Int,
+    @SerialName("tamanioPagina") val pageSize: Int,
+    @SerialName("resultados") val result: List<ApiMedication>,
 )

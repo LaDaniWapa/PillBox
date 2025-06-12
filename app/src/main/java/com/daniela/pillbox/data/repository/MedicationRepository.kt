@@ -288,6 +288,7 @@ class MedicationRepository(val ctx: Context) {
 
         val db = Appwrite.getDatabases(ctx)
         val today = LocalDateTime.now().toLocalDate()
+        println("today: $today")
 
         val documents = db.listDocuments(
             databaseId = BuildConfig.DATABASE_ID,

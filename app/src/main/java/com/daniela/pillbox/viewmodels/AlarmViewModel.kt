@@ -1,13 +1,7 @@
 package com.daniela.pillbox.viewmodels
 
 import android.content.Context
-import android.content.Intent
-import android.os.Build
-import android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
 import cafe.adriel.voyager.core.model.ScreenModel
-import com.daniela.pillbox.activity.MainActivity
-import com.daniela.pillbox.data.models.Medication
-import com.daniela.pillbox.data.models.Schedule
 import com.daniela.pillbox.data.models.toMedication
 import com.daniela.pillbox.data.models.toSchedule
 import com.daniela.pillbox.data.repository.MedicationRepository
@@ -17,8 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.util.Calendar
-import kotlin.coroutines.EmptyCoroutineContext.get
 
 /**
  * ViewModel for managing alarms.

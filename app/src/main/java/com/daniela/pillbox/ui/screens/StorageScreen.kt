@@ -212,13 +212,25 @@ class StorageScreen : BaseScreen() {
                 }
             }
 
-            // Add button
-            FloatingActionButton(
-                onClick = { navigator.push(AddMedicationScreen()) },
-                modifier = Modifier.padding(16.dp),
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_medication))
+
+            Column {
+                // Search button
+                FloatingActionButton(
+                    onClick = { navigator.push(ApiSearchScreen()) },
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(Icons.Rounded.Search, contentDescription = stringResource(R.string.add_medication))
+                }
+
+                // Add button
+                FloatingActionButton(
+                    onClick = { navigator.push(AddMedicationScreen()) },
+                    modifier = Modifier.padding(16.dp),
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_medication))
+                }
             }
         }
     }

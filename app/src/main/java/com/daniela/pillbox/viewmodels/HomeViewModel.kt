@@ -12,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.daniela.pillbox.R
 import com.daniela.pillbox.activity.MainActivity
-import com.daniela.pillbox.data.models.IntakeWithDocId
 import com.daniela.pillbox.data.models.ScheduleWithMedicationAndDocId
 import com.daniela.pillbox.data.repository.AuthRepository
 import com.daniela.pillbox.data.repository.MedicationRepository
@@ -40,7 +39,6 @@ class HomeViewModel(
 ) : ScreenModel {
     // Coroutine
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private var intakes: List<IntakeWithDocId> = emptyList()
 
     private val _uiState = mutableStateOf(HomeUiState())
     val uiState: State<HomeUiState> = _uiState
@@ -123,13 +121,6 @@ class HomeViewModel(
                         updateUiState {
                             copy(
                                 schedulesWithMedications = meds ?: emptyList(),
-                                checkedStates = meds?.associate {
-                                    Pair(
-                                        it.docId!!,
-                                        it.times?.get(0)!!
-                                    ) to false
-                                }
-                                    ?: emptyMap(),
                                 authState = AuthState.Authenticated(currentAuth.user)
                             )
                         }
@@ -197,11 +188,17 @@ class HomeViewModel(
      */
     fun getUserIntakes(userId: String) {
         coroutineScope.launch {
-            var oldCheckStatus = _uiState.value.checkedStates.toMutableMap()
+            var newCheckedStates = _uiState.value.checkedStates.toMutableMap()
+
             medsRepository.getMarkedMedications(userId).forEach { intake ->
-                oldCheckStatus[intake.scheduleId to intake.time] = true
+                newCheckedStates[intake.scheduleId to intake.time] = true
             }
-            updateUiState { copy(checkedStates = oldCheckStatus) }
+            updateUiState {
+                copy(
+                    checkedStates = newCheckedStates,
+                    isIntakesLoading = false
+                )
+            }
         }
     }
 
@@ -211,7 +208,7 @@ class HomeViewModel(
      * @return True if the medication has been taken, false otherwise.
      */
     fun isMedicationTaken(id: String, time: String): Boolean {
-        return _uiState.value.checkedStates.get(id to time) == true
+        return _uiState.value.checkedStates.getOrDefault(id to time, false)
     }
 
     /**
@@ -429,5 +426,6 @@ class HomeViewModel(
         val showMenu: Boolean = false,
         val schedulesWithMedications: List<ScheduleWithMedicationAndDocId> = emptyList(),
         val checkedStates: Map<Pair<String, String>, Boolean> = emptyMap(),
+        val isIntakesLoading: Boolean = true
     )
 }

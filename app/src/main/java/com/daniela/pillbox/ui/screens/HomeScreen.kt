@@ -36,29 +36,29 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.daniela.pillbox.R
+import com.daniela.pillbox.data.models.ScheduleWithMedicationAndDocId
 import com.daniela.pillbox.ui.components.FullScreenLoader
+import com.daniela.pillbox.utils.capitalized
 import com.daniela.pillbox.viewmodels.HomeViewModel
 import com.daniela.pillbox.viewmodels.HomeViewModel.AuthState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.core.graphics.toColorInt
-import com.daniela.pillbox.data.models.ScheduleWithMedicationAndDocId
-import com.daniela.pillbox.utils.capitalized
 
 
 /**
@@ -99,7 +99,7 @@ class HomeScreen : BaseScreen() {
             // Error icon
             Icon(
                 imageVector = Icons.Rounded.ErrorOutline,
-                contentDescription = "Error",
+                contentDescription = stringResource(R.string.error),
                 tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier.size(48.dp)
             )
@@ -108,7 +108,7 @@ class HomeScreen : BaseScreen() {
 
             // Error title
             Text(
-                text = "Something went wrong",
+                text = stringResource(R.string.something_went_wrong),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -137,11 +137,11 @@ class HomeScreen : BaseScreen() {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Rounded.Refresh,
-                        contentDescription = "Retry",
+                        contentDescription = stringResource(R.string.retry),
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Try Again")
+                    Text(stringResource(R.string.try_again))
                 }
             }
         }
@@ -156,6 +156,8 @@ class HomeScreen : BaseScreen() {
      */
     @Composable
     fun MainContent(vm: HomeViewModel, navigator: Navigator, state: HomeViewModel.HomeUiState) {
+        if (state.isIntakesLoading) return FullScreenLoader()
+
         // Header with date and menu
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -194,10 +196,6 @@ class HomeScreen : BaseScreen() {
                         onClick = { navigator.push(StorageScreen()) }
                     )
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.reload)) },
-                        onClick = { /*navigator.push(StorageScreen())*/ }
-                    )
-                    DropdownMenuItem(
                         text = { Text(stringResource(R.string.logout)) },
                         onClick = { vm.logout() }
                     )
@@ -219,21 +217,11 @@ class HomeScreen : BaseScreen() {
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item {
-                Button(
-                    onClick = {
-                        vm.testAlarmSystem()
-                    }
-                ) {
-                    Text(stringResource(R.string.add_alarm))
-                }
-            }
-
-            items(state.schedulesWithMedications) { med ->
+            items(state.schedulesWithMedications) { schedule ->
                 NewMedicationItem(
-                    scheduleWithMedication = med,
-                    isChecked = vm.isMedicationTaken(med.docId!!, med.times?.get(0)!!),
-                    onCheckedChange = { vm.toggleMedicationChecked(med) }
+                    scheduleWithMedication = schedule,
+                    isChecked = vm.isMedicationTaken(schedule.docId!!, schedule.times?.get(0)!!),
+                    onCheckedChange = { vm.toggleMedicationChecked(schedule) }
                 )
             }
         }
@@ -326,19 +314,8 @@ private fun NewMedicationItem(
             ) {
                 // Name
                 Text(
-                    text = scheduleWithMedication.medicationObj?.name ?: "Unknown Medication",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Name
-                Text(
-                    text = scheduleWithMedication.userId ?: "null",
+                    text = scheduleWithMedication.medicationObj?.name
+                        ?: stringResource(R.string.unknown_medication),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
