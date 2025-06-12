@@ -83,7 +83,7 @@ The app was built using:
   <!-- You can add Google Play badge here when available -->
 </div>
 
-#### Via F-Droid
+#### Via F-Droid (Not yet available)
 
 1. **Enable F-Droid** (if not already installed):
     - Download from [f-droid.org](https://f-droid.org)
